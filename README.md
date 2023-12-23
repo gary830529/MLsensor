@@ -5,6 +5,7 @@ This repository contains the R code accompanying the published paper "Developmen
 
 ## Citation
 If you use this code or our findings in your research, please cite:
+
 Shyu, H.-Y., Castro, C. J., Bair, R. A., Lu, Q., & Yeh, D. H. (2023). Development of a Soft Sensor Using Machine Learning Algorithms for Predicting the Water Quality of an Onsite Wastewater Treatment System. ACS Environmental Au, 3(5), 308–318. https://doi.org/10.1021/acsenvironau.2c00072
 
 ## Abstract of Publication 
@@ -31,7 +32,7 @@ The dataset used in this project is available upon request due to privacy or con
 Please note that the data is subject to certain usage restrictions and may require agreeing to a data usage agreement.
 
 ## License
-<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://github.com/gary830529/MLsensor">Development of a Soft Sensor Using Machine Learning Algorithms for Predicting the Water Quality of an Onsite Wastewater Treatment System</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://gary830529.github.io/Homepage/">Hsiang-Yang Shyu</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
+<p xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://github.com/gary830529/MLsensor">Development of a Soft Sensor Using Machine Learning Algorithms for Predicting the Water Quality of an Onsite Wastewater Treatment System</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://gary830529.github.io/Homepage/">Hsiang-Yang Shyu</a> is licensed under <a href="http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">Attribution 4.0 International<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1"><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1"></a></p>
 
 
 
