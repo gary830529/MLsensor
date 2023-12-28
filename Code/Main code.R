@@ -2,6 +2,9 @@ pacman::p_load(plyr,dplyr,reshape2,stringr,lubridate,readxl,openxlsx,janitor,ggp
                tidyverse,rstatix,PtProcess,gtable,gridExtra,cowplot,jpg,tiff,pwr,MOTE,kableExtra,tinytex,knitr,quantmod,class,caret,gmodels,
                officedown,officer,flextable,car,C50,GGally,ggResidpanel,ggfortify,caretEnsemble,randomForest,corrplot,neuralnet,lemon,Hmisc,scales,
                glue,ggtext,png,gtools,ggrepel,rvg,gdata,scales,nnet,xgboost,correlation,psych,corrgram,jpeg)
+colx <- colorRampPalette(c("#16068a","#9e189d","#fdb32e"))
+colx2 <- colorRampPalette(c("#007abf","#f7b81a"))
+
 #### Start ####
 Raw <- read.csv(file = 'G:/My Drive/R project/GitHub/MLsensor/Raw_data/Data_ML.csv',header = T, sep = ",")
 Raw$Date <- ymd(Raw$Date)
@@ -370,7 +373,7 @@ rfe.T.net <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T
 
 #saveRDS(rfe.T.net,"G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_rnn.rds")
 
-# COD REF Plot #
+# TSS REF Plot #
 rfe.T.net_Plot <- ggplot(rfe.T.net,aes(rfe.T.net$variables,rfe.T.net$results$RMSE))+geom_point()+theme_bw()+
   theme(text = element_text(size=8))+labs(y = "RMSE",title = "TSS-QRNN")+
   annotate("label", label = paste("Variable: ",predictors(rfe.T.net)[1],",",
@@ -430,5 +433,174 @@ rfe.T.cub_Plot <- ggplot(rfe.T.cub,aes(rfe.T.cub$variables,rfe.T.cub$results$RMS
 
 rfe.T_Plot <- ggarrange(rfe.T.net_Plot, rfe.T.pls_Plot, rfe.T.knn_Plot,rfe.T.svm_Plot, rfe.T.rf_Plot, rfe.T.cub_Plot,
                         labels = "AUTO", nrow=3, ncol = 2, align = "v")
-#ggsave("E:/Dropbox/R project/Machine Learning/Figure/TRFE.jpg",plot=rfe.T_Plot,width = 6, height = 4, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3-2.jpg",plot=rfe.T_Plot,width = 6, height = 4, dpi = 600)
+
+
+#### E.coli REF Models ####
+rfe.E.lm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_lm.rds")
+#e.rfe.fun("lm",WQ.Cp)
+rfe.E.pls <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_pls.rds")
+#e.rfe.fun("pls",WQ.Cp,tuneLength = 5)
+rfe.E.rf <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_rf.rds")
+#e.rfe.fun("rf",WQ.Cp)
+rfe.E.knn <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_knn.rds")
+#e.rfe.fun("knn",WQ.Cp)
+rfe.E.svm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_svm.rds")
+#e.rfe.fun("svmRadial",WQ.Cp)
+rfe.E.cub <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_cub.rds")
+#e.rfe.fun("cubist",WQ.Cp)
+rfe.E.net <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_rnn.rds")
+#e.rfe.fun("qrnn",WQ.Cp)
+
+#saveRDS(rfe.E.net,"G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_rnn.rds")
+
+# E.coli REF Plot #
+rfe.E.net_Plot <- ggplot(rfe.E.net,aes(rfe.E.net$variables,rfe.E.net$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "E. coli-QRNN")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.E.net)[1],",",
+                                  predictors(rfe.E.net)[2],",", predictors(rfe.E.net)[3],",",
+                                  predictors(rfe.E.net)[4],",", predictors(rfe.E.net)[5],",",
+                                  predictors(rfe.E.net)[6]),x = 6.5,
+           y = max(rfe.E.net$results$RMSE+rfe.E.net$results$RMSESD)+10^7.5, size = 1.8, colour = "black")+ 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^6,10^8),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  geom_errorbar(aes(ymin=(rfe.E.net$results$RMSE-rfe.E.net$results$RMSESD), ymax=(rfe.E.net$results$RMSE+rfe.E.net$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.E.pls_Plot <- ggplot(rfe.E.pls,aes(rfe.E.pls$variables,rfe.E.pls$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "E. coli-PLS")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.E.pls)[1],",",
+                                  predictors(rfe.E.pls)[2],",", predictors(rfe.E.pls)[3],",",
+                                  predictors(rfe.E.pls)[4],",", predictors(rfe.E.pls)[5],",",
+                                  predictors(rfe.E.pls)[6],",", predictors(rfe.E.pls)[7]),x = 6.5,
+           y = max(rfe.E.pls$results$RMSE+rfe.E.pls$results$RMSESD)+10^7.5, size = 1.8, colour = "black")+ 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^6,10^8),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  geom_errorbar(aes(ymin=(rfe.E.pls$results$RMSE-rfe.E.pls$results$RMSESD), ymax=(rfe.E.pls$results$RMSE+rfe.E.pls$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.E.rf_Plot <- ggplot(rfe.E.rf,aes(rfe.E.rf$variables,rfe.E.rf$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "E. coli-RF")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.E.rf)[1],",",
+                                  predictors(rfe.E.rf)[2],",", predictors(rfe.E.rf)[3],",",
+                                  predictors(rfe.E.rf)[4],",", predictors(rfe.E.rf)[5],",",
+                                  predictors(rfe.E.rf)[6],",", predictors(rfe.E.rf)[7],",",
+                                  predictors(rfe.E.rf)[8]),x = 6.5,
+           y = max(rfe.E.rf$results$RMSE+rfe.E.rf$results$RMSESD)+10^7.5, size = 2, colour = "black")+ 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^6,10^8),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  geom_errorbar(aes(ymin=(rfe.E.rf$results$RMSE-rfe.E.rf$results$RMSESD), ymax=(rfe.E.rf$results$RMSE+rfe.E.rf$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.E.knn_Plot <- ggplot(rfe.E.knn,aes(rfe.E.knn$variables,rfe.E.knn$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "E. coli-KNN")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.E.knn)[1],",",
+                                  predictors(rfe.E.knn)[2],",", predictors(rfe.E.knn)[3],",",
+                                  predictors(rfe.E.knn)[4],",", predictors(rfe.E.knn)[5],",",
+                                  predictors(rfe.E.knn)[6],",", predictors(rfe.E.knn)[7],",",
+                                  predictors(rfe.E.knn)[8]),x = 6.5,
+           y = max(rfe.E.knn$results$RMSE+rfe.E.knn$results$RMSESD)+10^7.5, size = 2, colour = "black")+ 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^6,10^8),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  geom_errorbar(aes(ymin=(rfe.E.knn$results$RMSE-rfe.E.knn$results$RMSESD), ymax=(rfe.E.knn$results$RMSE+rfe.E.knn$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.E.svm_Plot <- ggplot(rfe.E.svm,aes(rfe.E.svm$variables,rfe.E.svm$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "E. coli-SVR")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.E.svm)[1],",",
+                                  predictors(rfe.E.svm)[2],",", predictors(rfe.E.svm)[3],",",
+                                  predictors(rfe.E.svm)[4],",", predictors(rfe.E.svm)[5]),x = 6.5,
+           y = max(rfe.E.svm$results$RMSE+rfe.E.svm$results$RMSESD)+10^7.5, size = 1.8, colour = "black")+ 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^6,10^8),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  geom_errorbar(aes(ymin=(rfe.E.svm$results$RMSE-rfe.E.svm$results$RMSESD), ymax=(rfe.E.svm$results$RMSE+rfe.E.svm$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.E.cub_Plot <- ggplot(rfe.E.cub,aes(rfe.E.cub$variables,rfe.E.cub$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "E. coli-CUB")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.E.cub)[1],",",
+                                  predictors(rfe.E.cub)[2],",", predictors(rfe.E.cub)[3],",",
+                                  predictors(rfe.E.cub)[5],",",
+                                  predictors(rfe.E.cub)[6]),x = 6.5,
+           y = max(rfe.E.cub$results$RMSE+rfe.E.cub$results$RMSESD)+10^7.5, size = 1.8, colour = "black")+ 
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^6,10^8),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  geom_errorbar(aes(ymin=(rfe.E.cub$results$RMSE-rfe.E.cub$results$RMSESD), ymax=(rfe.E.cub$results$RMSE+rfe.E.cub$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.E_Plot <- ggarrange(rfe.E.net_Plot, rfe.E.pls_Plot,rfe.E.knn_Plot,rfe.E.svm_Plot, rfe.E.rf_Plot,rfe.E.cub_Plot,
+                        labels = "AUTO", nrow=3, ncol = 2, align = "v")
+
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3-3.jpg",plot=rfe.E_Plot,width = 6, height = 4, dpi = 600)
+
+#### REF Plot ####
+REF.R <- ggarrange(rfe.C.pls_Plot, rfe.C.svm_Plot, rfe.C.cub_Plot, rfe.C.net_Plot,
+                      rfe.T.pls_Plot, rfe.T.svm_Plot, rfe.T.cub_Plot, rfe.T.net_Plot,
+                      rfe.E.pls_Plot, rfe.E.svm_Plot, rfe.E.cub_Plot, rfe.E.net_Plot,
+                      labels = "AUTO", ncol=4,nrow = 3, align = "v")
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3.tiff",plot=REF.R,width = 10, height = 5, dpi = 600)
+
+
+#### Test & Train Datasets (Separate 70/30) ####
+set.seed(1234)
+WQ2.index <- sample(1:nrow(WQ2),size=nrow(WQ2)*0.7,replace = FALSE)
+WQ2.train <- WQ2[WQ2.index,]
+WQ2.test <- WQ2[-WQ2.index,]
+
+
+#### Cross-Validation Determination ####
+k_values <- c(3, 5, 10, 15, 20)
+models <- c("pls", "rf", "knn", "svmRadial", "cubist", "qrnn")
+k_fold <- data.frame(k = numeric(), method = character(), accuracy = numeric(), std = numeric(), par = character())
+
+for (i in 1:length(k_values)) {
+  for (j in 1:length(models)) {
+    set.seed(123)
+    model <- train(COD ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ.Cp, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
+    acc <- mean(model$resample$RMSE)
+    accsd <- sd(model$resample$RMSE)
+    k_fold <- rbind(k_fold, data.frame(k = k_values[i], method = models[j], accuracy = acc, std = accsd, par = "COD"))
+  }
+}
+
+for (i in 1:length(k_values)) {
+  for (j in 1:length(models)) {
+    set.seed(123)
+    model <- train(TSS ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ.Cp, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
+    acc <- mean(model$resample$RMSE)
+    accsd <- sd(model$resample$RMSE)
+    k_fold <- rbind(k_fold, data.frame(k = k_values[i], method = models[j], accuracy = acc, std = accsd, par = "TSS"))
+  }
+}
+
+for (i in 1:length(k_values)) {
+  for (j in 1:length(models)) {
+    set.seed(123)
+    model <- train(E.coli ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ.Cp, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
+    acc <- mean(model$resample$RMSE)
+    accsd <- sd(model$resample$RMSE)
+    k_fold <- rbind(k_fold, data.frame(k = k_values[i], method = models[j], accuracy = acc, std = accsd, par = "E.coli"))
+  }
+}
+
+k_df <- k_fold
+k_df$method <-  ifelse(k_df$method == c("pls", "rf", "knn", "svmRadial", "cubist", "qrnn"), c("PLS", "RF", "KNN", "SVR", "CUB", "QRNN"), 0)
+k_df$method <-factor(k_df$method , levels=c("PLS", "RF", "KNN", "SVR", "CUB", "QRNN"))
+
+k_df <- read.csv(file = 'G:/My Drive/R project/GitHub/MLsensor/Raw_data/K-fold_result.csv',header = T, sep = ",")
+k_df$method <- ifelse(k_df$method == "RNN", "QRNN", as.character(k_df$method))
+k_df$method <- factor(k_df$method , levels=c("PLS", "RF", "KNN", "SVR", "CUB", "QRNN"))
+k_df$par <- factor(k_df$par, levels=c("COD", "TSS", "E.coli"))
+
+k_foldx <- k_df %>% group_by(par, k) %>%
+  summarise(dv = mean(accuracy, na.rm=TRUE)) %>%
+  mutate(diff=(abs(lag(dv,default=first(dv))-dv))/lag(dv,default=first(dv))*100) %>% ungroup() %>% group_by(k) %>% summarise(mdiff = mean(diff, na.rm=TRUE))
+k_foldx
+
+k_plot <- ggplot(subset(k_df, method %in% c("PLS", "SVR", "CUB", "QRNN")), aes(x = k, y = accuracy, group = par, color = method)) + 
+  geom_line() + geom_point() + 
+  #geom_errorbar(aes(ymin=(accuracy-std), ymax=(accuracy+std)), width=0.5,alpha=0.8)+
+  facet_grid(par ~ method, scales="free") + theme_bw() +
+  scale_color_manual(values = c(colx(4)), guide = guide_legend(title = NULL))+
+  labs(x = "k", y = "RMSE", title = element_blank())+
+  theme(text = element_text(size=12),legend.position="none",
+        strip.background=element_blank(), #strip.text.y=element_text(size=8,face="bold.italic"), 
+        axis.line=element_line(),panel.grid.major = element_blank())
+k_plot
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS1.tiff",plot=k_plot,width = 6, height = 4, dpi = 600)
+
 
