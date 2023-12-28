@@ -246,29 +246,38 @@ WQ2.Cor
 
 #### Feature Elimination Analysis ####
 rctrl <- rfeControl(method = "cv", number=5, functions = caretFuncs, verbose = FALSE)
+
 c.rfe.fun <- function(mod.,inputT,...){
   caret::rfe(COD ~ Group+Turb+pH+NH4+NO3+Temp+Color+EC, data=inputT, sizes=c(5:8), method=mod.,rfeControl = rctrl,...)
 }
 
+t.rfe.fun <- function(mod.,inputT,...){
+  caret::rfe(TSS ~ Group+Turb+pH+NH4+NO3+Temp+Color+EC, data=inputT, sizes=c(5:8), method=mod.,rfeControl = rctrl,...)
+}
+
+e.rfe.fun <- function(mod.,inputT,...){
+  caret::rfe(E.coli ~ Group+Turb+pH+NH4+NO3+Temp+Color+EC, data=inputT, sizes=c(5:8), method=mod.,rfeControl = rctrl,...)
+}
+
 #### COD REF Models ####
-rfe.C.lm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/C_rfe_lm.rds")
+rfe.C.lm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_lm.rds")
 #c.rfe.fun("lm",WQ.Cp)
-rfe.C.pls <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/C_rfe_pls.rds")
+rfe.C.pls <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_pls.rds")
 #c.rfe.fun("pls",WQ.Cp,tuneLength = 5)
-rfe.C.rf <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/C_rfe_rf.rds")
+rfe.C.rf <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_rf.rds")
 #c.rfe.fun("rf",WQ.Cp)
-rfe.C.knn <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/C_rfe_knn.rds")
+rfe.C.knn <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_knn.rds")
 #c.rfe.fun("knn",WQ.Cp)
-rfe.C.svm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/C_rfe_svm.rds")
+rfe.C.svm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_svm.rds")
 #c.rfe.fun("svmRadial",WQ.Cp)
-rfe.C.cub <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/C_rfe_cub.rds")
+rfe.C.cub <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_cub.rds")
 #c.rfe.fun("cubist",WQ.Cp)
-rfe.C.net <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/C_rfe_rnn.rds")
+rfe.C.net <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_rnn.rds")
 #c.rfe.fun("qrnn",WQ.Cp)
 
-#saveRDS(rfe.C.net,"G:/My Drive/R project/GitHub/MLsensor/Save_model/C_rfe_rnn.rds")
+#saveRDS(rfe.C.net,"G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_rnn.rds")
 
-# REF Plot #
+# COD REF Plot #
 rfe.C.lm_Plot <- ggplot(rfe.C.lm,aes(rfe.C.lm$variables,rfe.C.lm$results$RMSE))+geom_point()+theme_bw()+
   theme(text = element_text(size=8))+labs(y = "RMSE",title = "COD-LM")+
   annotate("label", label = paste("Variable: ",predictors(rfe.C.lm)[1],",",
@@ -343,5 +352,83 @@ rfe.C_Plot
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3-1.jpg",plot=rfe.C_Plot,width = 6, height = 4, dpi = 300)
 
 
+#### TSS REF Models ####
+rfe.T.lm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_lm.rds")
+#t.rfe.fun("lm",WQ.Cp)
+rfe.T.pls <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_pls.rds")
+#t.rfe.fun("pls",WQ.Cp,tuneLength = 5)
+rfe.T.rf <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_rf.rds")
+#t.rfe.fun("rf",WQ.Cp)
+rfe.T.knn <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_knn.rds")
+#t.rfe.fun("knn",WQ.Cp)
+rfe.T.svm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_svm.rds")
+#t.rfe.fun("svmRadial",WQ.Cp)
+rfe.T.cub <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_cub.rds")
+#t.rfe.fun("cubist",WQ.Cp)
+rfe.T.net <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_rnn.rds")
+#t.rfe.fun("qrnn",WQ.Cp)
 
+#saveRDS(rfe.T.net,"G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_rnn.rds")
+
+# COD REF Plot #
+rfe.T.net_Plot <- ggplot(rfe.T.net,aes(rfe.T.net$variables,rfe.T.net$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "TSS-QRNN")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.T.net)[1],",",
+                                  predictors(rfe.T.net)[2],",", predictors(rfe.T.net)[3],",",
+                                  predictors(rfe.T.net)[4],",", predictors(rfe.T.net)[5],",",
+                                  predictors(rfe.T.net)[6],",", predictors(rfe.T.net)[7]),x = 6.5,
+           y = max(rfe.T.net$results$RMSE+rfe.T.net$results$RMSESD)+50, size = 1.7, colour = "black")+ 
+  ylim(100,450)+
+  geom_errorbar(aes(ymin=(rfe.T.net$results$RMSE-rfe.T.net$results$RMSESD), ymax=(rfe.T.net$results$RMSE+rfe.T.net$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.T.pls_Plot <- ggplot(rfe.T.pls,aes(rfe.T.pls$variables,rfe.T.pls$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "TSS-PLS")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.T.pls)[1],",",
+                                  predictors(rfe.T.pls)[2],",", predictors(rfe.T.pls)[3],",",
+                                  predictors(rfe.T.pls)[4],",", predictors(rfe.T.pls)[5]),x = 6.5,
+           y = max(rfe.T.pls$results$RMSE+rfe.T.pls$results$RMSESD)+50, size = 1.8, colour = "black")+ 
+  ylim(100,450)+
+  geom_errorbar(aes(ymin=(rfe.T.pls$results$RMSE-rfe.T.pls$results$RMSESD), ymax=(rfe.T.pls$results$RMSE+rfe.T.pls$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.T.rf_Plot <- ggplot(rfe.T.rf,aes(rfe.T.rf$variables,rfe.T.rf$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "TSS-RF")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.T.rf)[1],",",
+                                  predictors(rfe.T.rf)[2],",", predictors(rfe.T.rf)[3],",",
+                                  predictors(rfe.T.rf)[4],",", predictors(rfe.T.rf)[5]),x = 6.5,
+           y = max(rfe.T.rf$results$RMSE+rfe.T.rf$results$RMSESD)+50, size = 2, colour = "black")+ 
+  ylim(100,450)+
+  geom_errorbar(aes(ymin=(rfe.T.rf$results$RMSE-rfe.T.rf$results$RMSESD), ymax=(rfe.T.rf$results$RMSE+rfe.T.rf$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.T.knn_Plot <- ggplot(rfe.T.knn,aes(rfe.T.knn$variables,rfe.T.knn$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "TSS-KNN")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.T.knn)[1],",",
+                                  predictors(rfe.T.knn)[2],",", predictors(rfe.T.knn)[3],",",
+                                  predictors(rfe.T.knn)[4],",", predictors(rfe.T.knn)[5]),x = 6.5,
+           y = max(rfe.T.knn$results$RMSE+rfe.T.knn$results$RMSESD)+50, size = 2, colour = "black")+ 
+  ylim(100,450)+
+  geom_errorbar(aes(ymin=(rfe.T.knn$results$RMSE-rfe.T.knn$results$RMSESD), ymax=(rfe.T.knn$results$RMSE+rfe.T.knn$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.T.svm_Plot <- ggplot(rfe.T.svm,aes(rfe.T.svm$variables,rfe.T.svm$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "TSS-SVR")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.T.svm)[1],",",
+                                  predictors(rfe.T.svm)[2],",", predictors(rfe.T.svm)[3],",",
+                                  predictors(rfe.T.svm)[4],",", predictors(rfe.T.svm)[5],",",
+                                  predictors(rfe.T.svm)[6],",", predictors(rfe.T.svm)[7]),x = 6.5,
+           y = max(rfe.T.svm$results$RMSE+rfe.T.svm$results$RMSESD)+50, size = 1.8, colour = "black")+ 
+  ylim(100,450)+
+  geom_errorbar(aes(ymin=(rfe.T.svm$results$RMSE-rfe.T.svm$results$RMSESD), ymax=(rfe.T.svm$results$RMSE+rfe.T.svm$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.T.cub_Plot <- ggplot(rfe.T.cub,aes(rfe.T.cub$variables,rfe.T.cub$results$RMSE))+geom_point()+theme_bw()+
+  theme(text = element_text(size=8))+labs(y = "RMSE",title = "TSS-CUB")+
+  annotate("label", label = paste("Variable: ",predictors(rfe.T.cub)[1],",",
+                                  predictors(rfe.T.cub)[2],",", predictors(rfe.T.cub)[3],",",
+                                  predictors(rfe.T.cub)[4],",", predictors(rfe.T.cub)[5],",",
+                                  predictors(rfe.T.cub)[6],",", predictors(rfe.T.cub)[7]),x = 6.5,
+           y = max(rfe.T.cub$results$RMSE+rfe.T.cub$results$RMSESD)+50, size = 1.8, colour = "black")+ 
+  ylim(100,450)+
+  geom_errorbar(aes(ymin=(rfe.T.cub$results$RMSE-rfe.T.cub$results$RMSESD), ymax=(rfe.T.cub$results$RMSE+rfe.T.cub$results$RMSESD)), width=0.1,alpha=0.8)
+
+rfe.T_Plot <- ggarrange(rfe.T.net_Plot, rfe.T.pls_Plot, rfe.T.knn_Plot,rfe.T.svm_Plot, rfe.T.rf_Plot, rfe.T.cub_Plot,
+                        labels = "AUTO", nrow=3, ncol = 2, align = "v")
+#ggsave("E:/Dropbox/R project/Machine Learning/Figure/TRFE.jpg",plot=rfe.T_Plot,width = 6, height = 4, dpi = 600)
 
