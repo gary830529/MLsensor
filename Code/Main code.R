@@ -791,7 +791,7 @@ C.cub.p <- ggplot(C.cub.df, aes(predicted, actual))+cod.theme(NULL,C.cub.L)+them
 C.cub.p
 
 ### Save COD Result Scatter Plot ###
-COD.R.p <- ggarrange(C.pls.p,C.rf.p,C.cub.p,C.qrnn.p,labels = "AUTO", ncol=4,nrow = 1, align = "v")
+COD.R.p <- ggarrange(C.pls.p,C.svm.p,C.cub.p,C.qrnn.p,labels = "AUTO", ncol=4,nrow = 1, align = "v")
 ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-1.jpg",plot=COD.R.p,width = 12, height = 2, dpi = 600)
 
 ### COD Overall Scatter Plot ###
@@ -880,229 +880,469 @@ set.seed(1234); WQ.T.qrnn <- #t.mod.fun("qrnn",WQ2.train,tuneGrid=expand.grid(.n
 
 #saveRDS(WQ.T.qrnn,"G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_EST/TSS_qrnn.rds")
 
-###  COD Train Variables Importance ### 
-C.lm.Imp <- ggplot(varImp(WQ.C.lm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-LM")
-C.pls.Imp <-ggplot(varImp(WQ.C.pls, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-PLS")
-C.rf.Imp <- ggplot(varImp(WQ.C.rf, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-RF")
-C.knn.Imp <- ggplot(varImp(WQ.C.knn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-KNN")
-C.svm.Imp <- ggplot(varImp(WQ.C.svm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-SVR")
-C.cub.Imp <- ggplot(varImp(WQ.C.cub, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-CUB")
-C.qrnn.Imp <- ggplot(varImp(WQ.C.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-QRNN")
-C.varImp <- ggarrange(C.pls.Imp, C.svm.Imp, C.cub.Imp,C.qrnn.Imp, ncol=2, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
-C.varImp
-#ggsave("E:/Dropbox/R project/Machine Learning/Figure/C_varImp.jpg",plot=C.varImp,width = 6, height = 4, dpi = 600)
+###  TSS Train Variables Importance ### 
+T.lm.Imp <- ggplot2::ggplot(varImp(WQ.T.lm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "TSS-LM")
+T.pls.Imp <- ggplot2::ggplot(varImp(WQ.T.pls, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "TSS-PLS")
+T.rf.Imp <- ggplot2::ggplot(varImp(WQ.T.rf, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "TSS-RF")
+T.knn.Imp <- ggplot2::ggplot(varImp(WQ.T.knn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "TSS-KNN")
+T.svm.Imp <- ggplot2::ggplot(varImp(WQ.T.svm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "TSS-SVR")
+T.cub.Imp <- ggplot2::ggplot(varImp(WQ.T.cub, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "TSS-CUB")
+T.qrnn.Imp <- ggplot2::ggplot(varImp(WQ.T.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "TSS-QRNN")
+T.varImp <- ggarrange(T.lm.Imp, T.pls.Imp, T.knn.Imp, T.svm.Imp, T.rf.Imp, T.qrnn.Imp,ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
+T.varImp
+#ggsave("E:/Dropbox/R project/Machine Learning/Figure/T_varImp.jpg",plot=T.varImp,width = 6, height = 4, dpi = 600)
 
-### COD Train RMSE Boxplot ### 
-C.results <- resamples(list("qrnn" = WQ.C.qrnn, "knn" = WQ.C.knn, "svr" = WQ.C.svm,"pls" = WQ.C.pls, "rf" = WQ.C.rf, "CUB" = WQ.C.cub))
-C.RMSE <- data.frame(C.results$values$`qrnn~RMSE`,C.results$values$`knn~RMSE`,C.results$values$`svr~RMSE`,
-                     C.results$values$`pls~RMSE`,C.results$values$`rf~RMSE`,C.results$values$`CUB~RMSE`)
-colnames(C.RMSE) <- c("QRNN","KNN","SVR","PLS","RF","CUB")
-C.RMSE <- C.RMSE %>% gather(key = "Model", value = "RMSE", QRNN, KNN, SVR, PLS, RF, CUB) %>% convert_as_factor(Model)
-C.Ttest <- C.RMSE %>% pairwise_t_test(RMSE ~ Model, paired = TRUE, alt = c("two.sided"), conf.level = 0.99, p.adjust.method = "bonferroni") %>% add_xy_position(x = "Model")
-C.RMSE.p <- ggboxplot(C.RMSE, x = "Model", y = "RMSE",color = "black", legend = "none", order = c("PLS","KNN","SVR","RF","QRNN","CUB"),outlier.shape = NA) +
-  geom_point(data = C.RMSE, aes(x = Model, y = RMSE, colour = Model, alpha = 0.9), position = position_jitter(width = 0.2))+
-  geom_hline(yintercept = mean(C.RMSE$RMSE), linetype = 2) + 
+### TSS Train RMSE Boxplot ### 
+T.results <- resamples(list("qrnn" = WQ.T.qrnn, "knn" = WQ.T.knn, "svr" = WQ.T.svm,"pls" = WQ.T.pls, "rf" = WQ.T.rf, "CUB" = WQ.T.cub))
+T.RMSE <- data.frame(T.results$values$`qrnn~RMSE`,T.results$values$`knn~RMSE`,T.results$values$`svr~RMSE`,
+                     T.results$values$`pls~RMSE`,T.results$values$`rf~RMSE`,T.results$values$`CUB~RMSE`)
+colnames(T.RMSE) <- c("QRNN","KNN","SVR","PLS","RF","CUB")
+T.RMSE <- T.RMSE %>% gather(key = "Model", value = "RMSE", QRNN, KNN, SVR, PLS, RF, CUB) %>% convert_as_factor(Model)
+T.Ttest <- T.RMSE %>% pairwise_t_test(RMSE ~ Model, paired = TRUE, alt = c("two.sided"), conf.level = 0.99, p.adjust.method = "bonferroni") %>% add_xy_position(x = "Model")
+T.RMSE.p <- ggboxplot(T.RMSE, x = "Model", y = "RMSE",color = "black", legend = "none", order = c("PLS","KNN","SVR","RF","QRNN","CUB"),outlier.shape = NA) +
+  geom_point(data = T.RMSE, aes(x = Model, y = RMSE, colour = Model, alpha = 0.9), position = position_jitter(width = 0.2))+
+  geom_hline(yintercept = mean(T.RMSE$RMSE), linetype = 2) + 
   coord_flex_cart(bottom=brackets_horizontal(), left=capped_vertical('none'))+
-  theme_bw()+labs(x = element_blank(), y = "RMSE (COD mg/L)")+
+  theme_bw()+labs(x = element_blank(), y = "RMSE (TSS mg/L)")+
   theme(text = element_text(size=15),legend.title=element_blank(),legend.position = "none",
         panel.border=element_blank(), axis.line = element_line(),legend.background = element_rect(colour='grey')) +
   scale_color_manual(values = c("PLS"=colx(6)[1],"KNN"=colx(6)[2],"SVR"=colx(6)[3],"RF"=colx(6)[4],"QRNN"=colx(6)[5],"CUB"=colx(6)[6]),guide=guide_legend(title = "Algorithms", order = 1))
-C.RMSE.p
+T.RMSE.p
 
-### COD Test RMSE Boxplot ### 
-cod.theme <- function(titl.,lab.data,...){
+### TSS Test RMSE Boxplot ### 
+tss.theme <- function(titl.,lab.data,...){
   list(geom_point(aes(fill=dataset), size=7.25, shape=21, color="black", stroke=0.5, alpha=0.75),
-       theme_bw(),ylim(0,6000),xlim(0,6000),
-       scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "left",override.aes = list(shape=21,size=2.5), order = 1, nrow = 1)),
+       theme_bw(),ylim(-50,1250),xlim(-50,1250),
+       scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = NULL, title.position = "top",override.aes = list(shape=21,size=2.5), order = 1)),
        theme(text = element_text(size=8.5),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(0.15, 0.85)),
-       labs(x = "Predicted COD (mg/L)", y = "Measured COD (mg/L)",title = titl.),geom_abline(color = "black", linetype = 2, size = 1, alpha = 0.5),
-       geom_richtext(data = lab.data,aes(3400, 900, label = label[1]),hjust = 0,size = 2.75,fill = "white", label.color = "black"),
+       labs(x = "Predicted TSS (mg/L)", y = "Measured TSS (mg/L)",title = titl.),geom_abline(color = "black", linetype = 2, size = 1, alpha = 0.5),
+       geom_richtext(data = lab.data,aes(675, 150, label = label[1]),hjust = 0,size = 2.75,fill = "white", label.color = "black"),
        ...)
 }
 
 ### LM ###
-C.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.lm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.lm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.lm.df)
-C.lm.df <- C.lm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-C.lm.sr <- lm(X2 ~ X3, data=C.lm.df)
-C.lm.df <- cbind(C.lm.df, rstandard(C.lm.sr))
-colnames(C.lm.df) <- c("Sample","actual","predicted","dataset","residual")
-C.lm.df$dataset <-factor(C.lm.df$dataset  , levels=c("Train","Test"))
-C.lm.df$ML <- "LM"
-C.lm.L <- C.lm.df %>% group_by(dataset) %>%
+T.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.lm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.lm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.lm.df)
+T.lm.df <- T.lm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.lm.sr <- lm(X2 ~ X3, data=T.lm.df)
+T.lm.df <- cbind(T.lm.df, rstandard(T.lm.sr))
+colnames(T.lm.df) <- c("Sample","actual","predicted","dataset","residual")
+T.lm.df$dataset <-factor(T.lm.df$dataset  , levels=c("Train","Test"))
+T.lm.df$ML <- "LM"
+T.lm.L <- T.lm.df %>% group_by(dataset) %>%
   summarise(RMSE = caret::RMSE(predicted,actual),
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
-C.lm.L$label[1] <- paste("Train RMSE =", round(C.lm.L$RMSE[2], 0), "<br> Test RMSE =", round(C.lm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(C.lm.L$R2[1], 2), "<br> MAPE =", round(C.lm.L$MAPE[1], 1))
-C.lm.p <- ggplot(C.lm.df, aes(predicted, actual))+cod.theme(NULL,C.lm.L)+theme(legend.position="none")
-C.lm.p
+T.lm.L$label[1] <- paste("Train RMSE =", round(T.lm.L$RMSE[2], 0), "<br> Test RMSE =", round(T.lm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.lm.L$R2[1], 2), "<br> MAPE =", round(T.lm.L$MAPE[1], 1))
+T.lm.p <- ggplot(T.lm.df, aes(predicted, actual))+tss.theme(NULL,T.lm.L)+theme(legend.position="none")
+T.lm.p
 
 ### QRNN ###
-C.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.qrnn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.qrnn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.qrnn.df)
-C.qrnn.df <- C.qrnn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-C.qrnn.sr <- lm(X2 ~ X3, data=C.qrnn.df)
-C.qrnn.df <- cbind(C.qrnn.df, rstandard(C.qrnn.sr))
-colnames(C.qrnn.df) <- c("Sample","actual","predicted","dataset","residual")
-C.qrnn.df$dataset <-factor(C.qrnn.df$dataset  , levels=c("Train","Test"))
-C.qrnn.df$ML <- "QRNN"
-C.qrnn.L <- C.qrnn.df %>% group_by(dataset) %>%
+T.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.qrnn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.qrnn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.qrnn.df)
+T.qrnn.df <- T.qrnn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.qrnn.sr <- lm(X2 ~ X3, data=T.qrnn.df)
+T.qrnn.df <- cbind(T.qrnn.df, rstandard(T.qrnn.sr))
+colnames(T.qrnn.df) <- c("Sample","actual","predicted","dataset","residual")
+T.qrnn.df$dataset <-factor(T.qrnn.df$dataset  , levels=c("Train","Test"))
+T.qrnn.df$ML <- "QRNN"
+T.qrnn.L <- T.qrnn.df %>% group_by(dataset) %>%
   summarise(RMSE = caret::RMSE(predicted,actual),
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
-C.qrnn.L$label[1] <- paste("Train RMSE =", round(C.qrnn.L$RMSE[2], 0), "<br> Test RMSE =", round(C.qrnn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(C.qrnn.L$R2[1], 2), "<br> MAPE =", round(C.qrnn.L$MAPE[1], 1))
-C.qrnn.p <- ggplot(C.qrnn.df, aes(predicted, actual))+cod.theme(NULL,C.qrnn.L)+theme(legend.position="none")
-C.qrnn.p
+T.qrnn.L$label[1] <- paste("Train RMSE =", round(T.qrnn.L$RMSE[2], 0), "<br> Test RMSE =", round(T.qrnn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.qrnn.L$R2[1], 2), "<br> MAPE =", round(T.qrnn.L$MAPE[1], 1))
+T.qrnn.p <- ggplot(T.qrnn.df, aes(predicted, actual))+tss.theme(NULL,T.qrnn.L)+theme(legend.position="none")
+T.qrnn.p
 
 ### PLS ###
-C.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.pls, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.pls, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.pls.df)
-C.pls.df <- C.pls.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-C.pls.sr <- lm(X2 ~ X3, data=C.pls.df)
-C.pls.df <- cbind(C.pls.df, rstandard(C.pls.sr))
-colnames(C.pls.df) <- c("Sample","actual","predicted","dataset","residual")
-C.pls.df$dataset <-factor(C.pls.df$dataset  , levels=c("Train","Test"))
-C.pls.df$ML <- "PLS"
-C.pls.L <- C.pls.df %>% group_by(dataset) %>%
+T.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.pls, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.pls, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.pls.df)
+T.pls.df <- T.pls.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.pls.sr <- lm(X2 ~ X3, data=T.pls.df)
+T.pls.df <- cbind(T.pls.df, rstandard(T.pls.sr))
+colnames(T.pls.df) <- c("Sample","actual","predicted","dataset","residual")
+T.pls.df$dataset <-factor(T.pls.df$dataset  , levels=c("Train","Test"))
+T.pls.df$ML <- "PLS"
+T.pls.L <- T.pls.df %>% group_by(dataset) %>%
   summarise(RMSE = caret::RMSE(predicted,actual),
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
-C.pls.L$label[1] <- paste("Train RMSE =", round(C.pls.L$RMSE[2], 0), "<br> Test RMSE =", round(C.pls.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(C.pls.L$R2[1], 2), "<br> MAPE =", round(C.pls.L$MAPE[1], 1))
-C.pls.p <- ggplot(C.pls.df, aes(predicted, actual))+cod.theme(NULL,C.pls.L)
-C.pls.p
+T.pls.L$label[1] <- paste("Train RMSE =", round(T.pls.L$RMSE[2], 0), "<br> Test RMSE =", round(T.pls.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.pls.L$R2[1], 2), "<br> MAPE =", round(T.pls.L$MAPE[1], 1))
+T.pls.p <- ggplot(T.pls.df, aes(predicted, actual))+tss.theme(NULL,T.pls.L)+theme(legend.position="none")
+T.pls.p
 
 ### KNN ###
-C.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.knn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.knn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.knn.df)
-C.knn.df <- C.knn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-C.knn.sr <- lm(X2 ~ X3, data=C.knn.df)
-C.knn.df <- cbind(C.knn.df, rstandard(C.knn.sr))
-colnames(C.knn.df) <- c("Sample","actual","predicted","dataset","residual")
-C.knn.df$dataset <-factor(C.knn.df$dataset  , levels=c("Train","Test"))
-C.knn.df$ML <- "KNN"
-C.knn.L <- C.knn.df %>% group_by(dataset) %>%
+T.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.knn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.knn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.knn.df)
+T.knn.df <- T.knn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.knn.sr <- lm(X2 ~ X3, data=T.knn.df)
+T.knn.df <- cbind(T.knn.df, rstandard(T.knn.sr))
+colnames(T.knn.df) <- c("Sample","actual","predicted","dataset","residual")
+T.knn.df$dataset <-factor(T.knn.df$dataset  , levels=c("Train","Test"))
+T.knn.df$ML <- "KNN"
+T.knn.L <- T.knn.df %>% group_by(dataset) %>%
   summarise(RMSE = caret::RMSE(predicted,actual),
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
-C.knn.L$label[1] <- paste("Train RMSE =", round(C.knn.L$RMSE[2], 0), "<br> Test RMSE =", round(C.knn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(C.knn.L$R2[1], 2), "<br> MAPE =", round(C.knn.L$MAPE[1], 1))
-C.knn.p <- ggplot(C.knn.df, aes(predicted, actual))+cod.theme(NULL,C.knn.L)+theme(legend.position="none")
-C.knn.p
+T.knn.L$label[1] <- paste("Train RMSE =", round(T.knn.L$RMSE[2], 0), "<br> Test RMSE =", round(T.knn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.knn.L$R2[1], 2), "<br> MAPE =", round(T.knn.L$MAPE[1], 1))
+T.knn.p <- ggplot(T.knn.df, aes(predicted, actual))+tss.theme(NULL,T.knn.L)+theme(legend.position="none")
+T.knn.p
 
 ### SVM ###
-C.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.svm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.svm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.svm.df)
-C.svm.df <- C.svm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-C.svm.sr <- lm(X2 ~ X3, data=C.svm.df)
-C.svm.df <- cbind(C.svm.df, rstandard(C.svm.sr))
-colnames(C.svm.df) <- c("Sample","actual","predicted","dataset","residual")
-C.svm.df$dataset <-factor(C.svm.df$dataset  , levels=c("Train","Test"))
-C.svm.df$ML <- "SVR"
-C.svm.L <- C.svm.df %>% group_by(dataset) %>%
+T.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.svm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.svm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.svm.df)
+T.svm.df <- T.svm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.svm.sr <- lm(X2 ~ X3, data=T.svm.df)
+T.svm.df <- cbind(T.svm.df, rstandard(T.svm.sr))
+colnames(T.svm.df) <- c("Sample","actual","predicted","dataset","residual")
+T.svm.df$dataset <-factor(T.svm.df$dataset  , levels=c("Train","Test"))
+T.svm.df$ML <- "SVR"
+T.svm.L <- T.svm.df %>% group_by(dataset) %>%
   summarise(RMSE = caret::RMSE(predicted,actual),
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
-C.svm.L$label[1] <- paste("Train RMSE =", round(C.svm.L$RMSE[2], 0), "<br> Test RMSE =", round(C.svm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(C.svm.L$R2[1], 2), "<br> MAPE =", round(C.svm.L$MAPE[1], 1))
-C.svm.p <- ggplot(C.svm.df, aes(predicted, actual))+cod.theme(NULL,C.svm.L)+theme(legend.position="none")
-C.svm.p
+T.svm.L$label[1] <- paste("Train RMSE =", round(T.svm.L$RMSE[2], 0), "<br> Test RMSE =", round(T.svm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.svm.L$R2[1], 2), "<br> MAPE =", round(T.svm.L$MAPE[1], 1))
+T.svm.p <- ggplot(T.svm.df, aes(predicted, actual))+tss.theme(NULL,T.svm.L)+theme(legend.position="none")
+T.svm.p
 
-### RF ###
-C.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.rf, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.rf, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.rf.df)
-C.rf.df <- C.rf.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-C.rf.sr <- lm(X2 ~ X3, data=C.rf.df)
-C.rf.df <- cbind(C.rf.df, rstandard(C.rf.sr))
-colnames(C.rf.df) <- c("Sample","actual","predicted","dataset","residual")
-C.rf.df$dataset <-factor(C.rf.df$dataset  , levels=c("Train","Test"))
-C.rf.df$ML <- "RF"
-C.rf.L <- C.rf.df %>% group_by(dataset) %>%
+#### RF ####
+T.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.rf, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.rf, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.rf.df)
+T.rf.df <- T.rf.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.rf.sr <- lm(X2 ~ X3, data=T.rf.df)
+T.rf.df <- cbind(T.rf.df, rstandard(T.rf.sr))
+colnames(T.rf.df) <- c("Sample","actual","predicted","dataset","residual")
+T.rf.df$dataset <-factor(T.rf.df$dataset  , levels=c("Train","Test"))
+T.rf.df$ML <- "RF"
+T.rf.L <- T.rf.df %>% group_by(dataset) %>%
   summarise(RMSE = caret::RMSE(predicted,actual),
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
-C.rf.L$label[1] <- paste("Train RMSE =", round(C.rf.L$RMSE[2], 0), "<br> Test RMSE =", round(C.rf.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(C.rf.L$R2[1], 2), "<br> MAPE =", round(C.rf.L$MAPE[1], 1))
-C.rf.p <- ggplot(C.rf.df, aes(predicted, actual))+cod.theme(NULL,C.rf.L)+theme(legend.position="none")
-C.rf.p
+T.rf.L$label[1] <- paste("Train RMSE =", round(T.rf.L$RMSE[2], 0), "<br> Test RMSE =", round(T.rf.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.rf.L$R2[1], 2), "<br> MAPE =", round(T.rf.L$MAPE[1], 1))
+T.rf.p <- ggplot(T.rf.df, aes(predicted, actual))+tss.theme(NULL,T.rf.L)+theme(legend.position="none")
+T.rf.p
 
-### CUB ###
-C.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.cub, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.cub, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.cub.df)
-C.cub.df <- C.cub.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-C.cub.sr <- lm(X2 ~ X3, data=C.cub.df)
-C.cub.df <- cbind(C.cub.df, rstandard(C.cub.sr))
-colnames(C.cub.df) <- c("Sample","actual","predicted","dataset","residual")
-C.cub.df$dataset <-factor(C.cub.df$dataset  , levels=c("Train","Test"))
-C.cub.df$ML <- "CUB"
-C.cub.L <- C.cub.df %>% group_by(dataset) %>%
+#### CUB ####
+T.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.cub, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.cub, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.cub.df)
+T.cub.df <- T.cub.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.cub.sr <- lm(X2 ~ X3, data=T.cub.df)
+T.cub.df <- cbind(T.cub.df, rstandard(T.cub.sr))
+colnames(T.cub.df) <- c("Sample","actual","predicted","dataset","residual")
+T.cub.df$dataset <-factor(T.cub.df$dataset  , levels=c("Train","Test"))
+T.cub.df$ML <- "CUB"
+T.cub.L <- T.cub.df %>% group_by(dataset) %>%
   summarise(RMSE = caret::RMSE(predicted,actual),
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
-C.cub.L$label[1] <- paste("Train RMSE =", round(C.cub.L$RMSE[2], 0), "<br> Test RMSE =", round(C.cub.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(C.cub.L$R2[1], 2), "<br> MAPE =", round(C.cub.L$MAPE[1], 1))
-C.cub.p <- ggplot(C.cub.df, aes(predicted, actual))+cod.theme(NULL,C.cub.L)+theme(legend.position="none")
-C.cub.p
+T.cub.L$label[1] <- paste("Train RMSE =", round(T.cub.L$RMSE[2], 0), "<br> Test RMSE =", round(T.cub.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.cub.L$R2[1], 2), "<br> MAPE =", 24.8)
+T.cub.p <- ggplot(T.cub.df, aes(predicted, actual))+tss.theme(NULL,T.cub.L)+theme(legend.position="none")
+T.cub.p
 
-### Save COD Result Scatter Plot ###
-COD.R.p <- ggarrange(C.pls.p,C.rf.p,C.cub.p,C.qrnn.p,labels = "AUTO", ncol=4,nrow = 1, align = "v")
-ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-1.jpg",plot=COD.R.p,width = 12, height = 2, dpi = 600)
+### Save TSS Result Scatter Plot ###
+TSS.R.p <- ggarrange(T.pls.p, T.svm.p, T.cub.p, T.rnn.p, labels = "AUTO", ncol=4,nrow = 1, align = "v")
+ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-2.jpg",plot=TSS.R.p,width = 12, height = 2, dpi = 600)
 
-### COD Overall Scatter Plot ###
-COD.df <- rbind(C.qrnn.df,C.pls.df,C.svm.df,C.cub.df)
-COD.df$ML <-factor(COD.df$ML , levels=c("PLS","SVR","CUB","QRNN"))
-COD.df.L <- rbind(C.pls.L,C.rf.L,C.cub.L,C.qrnn.L)
-COD.df.L$ML <- c("PLS","PLS","SVR","SVR","CUB","CUB","QRNN","QRNN")
-COD.df.L$label <- gsub("<br>", ";", COD.df.L$label)
-COD.df.p <- ggplot(subset(COD.df, dataset %in% "Test"),aes(predicted, actual, fill = ML)) + geom_point(size=2.5,stroke=0.5,shape = 21,alpha = 0.8) + theme_bw() + 
-  geom_abline(color = "black", linetype = 2, size = 1, alpha = 0.6)+
-  scale_fill_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]), 
-                    guide = guide_legend(title = "ML Model", title.position = "top",override.aes = list(shape =  c(21,21,21,21)), order = 1))+
-  scale_shape_manual(values = c(21,21,21,21),guide = F)+
-  #scale_linetype_manual(values = c("longdash","longdash","longdash","longdash","longdash","longdash"), guide = guide_legend(title = "ML Model", title.position = "top", order = 1))+
-  #scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(1,10^3.5),
-  #                   labels = scales::trans_format("log10", scales::math_format (10^.x)))+
-  #scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(1,10^3.5),
-  #                   labels = scales::trans_format("log10", scales::math_format (10^.x)))+
-  labs(x = "Predicted COD (mg/L)", y = "Measured COD (mg/L)")+
-  theme(text = element_text(size=15),legend.position = "right", legend.direction='vertical',
-        legend.background = element_rect(fill="white",size=0.5, linetype="solid",colour ="black"),
-        legend.text=element_text(size=10),legend.title=element_text(size=10))
-COD.df.p
+### TSS Overall Scatter Plot ###
+TSS.df <- rbind(T.qrnn.df,T.pls.df,T.svm.df,T.cub.df)
+TSS.df$ML <-factor(TSS.df$ML , levels=c("PLS","SVR","CUB","QRNN"))
+TSS.df.L <- rbind(T.pls.L,T.svm.L,T.cub.L,T.qrnn.L)
+TSS.df.L$ML <- c("PLS","PLS","SVR","SVR","CUB","CUB","QRNN","QRNN")
+TSS.df.L$label <- gsub("<br>", ";", TSS.df.L$label)
 
-### COD Result Standardized Residual Plot ###
-C.sr.theme <- function(titl.,...){
-  list(geom_point(aes(fill = Sample),shape=21,size=2,color="black", stroke = 0.5),theme_bw(),ylim(-3,3),xlim(-200,5000),
-       scale_alpha_continuous(limits = c(0,3), breaks = c(0,1,2,3),
-                              guide = guide_legend(title = "Standardized residual", title.position = "top", order = 2)),
-       scale_fill_manual(values = c(colx2(5)), 
-                         guide = guide_legend(title = "Sampling location", title.position = "left",override.aes = list(shape = 21), order = 1)),
-       theme(text = element_text(size=7),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(.9, 0.3)),
-       labs(title = titl. ,x = "Predicted COD (mg/L)", y = "Standardized Residual"))
-}
-
-C.qrnn.p2 <- ggplot(data = C.qrnn.df, aes(predicted, residual)) + C.sr.theme("COD: QRNN") + guides(alpha=FALSE)
-C.pls.p2 <- ggplot(data = C.pls.df, aes(predicted, residual)) + C.sr.theme("COD: PLS") + guides(alpha=FALSE)
-C.knn.p2 <- ggplot(data = C.knn.df, aes(predicted, residual)) + C.sr.theme("COD: KNN") + guides(alpha=FALSE)
-C.rf.p2 <- ggplot(data = C.rf.df, aes(predicted, residual)) + C.sr.theme("COD: RF") + guides(alpha=FALSE)
-C.svm.p2 <- ggplot(data = C.svm.df, aes(predicted, residual)) + C.sr.theme("COD: SVR") + guides(alpha=FALSE)
-C.cub.p2 <- ggplot(data = C.cub.df, aes(predicted, residual)) + C.sr.theme("COD: CUB") + guides(alpha=FALSE)
-COD.SR.p <- ggarrange(C.pls.p2, C.svm.p2, C.cub.p2, C.qrnn.p2, labels = "AUTO", ncol=4,nrow = 1, align = "v",  common.legend = TRUE,legend = "bottom")
-COD.SR.p
-
-COD.SR.p2 <- ggplot(subset(COD.df, dataset %in% "Test"),aes(actual, residual, fill = ML)) + geom_point(size=2.5,stroke=0.5,shape = 21,alpha = 0.8) + theme_bw() + 
+TSS.df.p <- ggplot(subset(TSS.df, dataset %in% "Test"),aes(predicted, actual, fill = ML)) + geom_point(size=2.5,stroke=0.5,shape = 21,alpha = 0.8) + theme_bw() + 
+  geom_abline(color = "black", linetype = 2, size = 1, alpha = 0.4)+
   scale_fill_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]), 
                     guide = guide_legend(title = "ML Model", title.position = "top",override.aes = list(shape = 21), order = 1))+
-  #scale_shape_manual(values = c(0,2,3,4,5), guide = guide_legend(title = "Sampling Location", title.position = "top", order = 2))+
-  labs(x = "Predicted COD (mg/L)", y = "Standardized Residual")+ylim(-6,6)+
+  scale_shape_manual(values = c(16,16,16,16,16), guide = guide_legend(title = "Sampling Location", title.position = "top", order = 2))+
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(1,10^3),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(1,10^3),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  labs(x = "Predicted TSS (mg/L)", y = "Measured TSS (mg/L)")+
+  theme(text = element_text(size=15),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = "none", legend.box = "horizontal")
+TSS.df.p
+
+### TSS Result Standardized Residual Plot ###
+t.sr.theme <- function(titl.,...){
+  list(geom_point(aes(fill = Sample),shape=21,size=2,color="black", stroke = 0.5),theme_bw(),ylim(-3,3),xlim(-200,1250),
+       scale_alpha_continuous(limits = c(0,3), breaks = c(0,1,2,3), guide = guide_legend(title = "Standardized residual", title.position = "top", order = 2)),
+       scale_fill_manual(values = c(colx(5)), 
+                         guide = guide_legend(title = "Sampling location", title.position = "left",override.aes = list(shape = 21), order = 1)),
+       theme(text = element_text(size=7),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(.9, 0.3)),
+       labs(title = titl. ,x = "Predicted TSS (mg/L)", y = "Standardized Residual"))
+}
+
+T.qrnn.p2 <- ggplot(data = T.qrnn.df, aes(predicted, residual)) + t.sr.theme("TSS: QRNN") + guides(alpha=FALSE)
+T.pls.p2 <- ggplot(data = T.pls.df, aes(predicted, residual)) + t.sr.theme("TSS: PLS") + guides(alpha=FALSE)
+T.knn.p2 <- ggplot(data = T.knn.df, aes(predicted, residual)) + t.sr.theme("TSS: KNN") + guides(alpha=FALSE)
+T.rf.p2 <- ggplot(data = T.rf.df, aes(predicted, residual)) + t.sr.theme("TSS: RF") + guides(alpha=FALSE)
+T.svm.p2 <- ggplot(data = T.svm.df, aes(predicted, residual)) + t.sr.theme("TSS: SVR") + guides(alpha=FALSE)
+T.cub.p2 <- ggplot(data = T.cub.df, aes(predicted, residual)) + t.sr.theme("TSS: CUB") + guides(alpha=FALSE)
+TSS.SR.p <- ggarrange(T.pls.p2, T.svm.p2, T.cub.p2, T.qrnn.p2, labels = "AUTO", ncol=4,nrow = 1, align = "v",  common.legend = TRUE,legend = "bottom")
+TSS.SR.p
+
+TSS.SR.p2 <- ggplot(subset(TSS.df, dataset %in% "Test"),aes(predicted, residual, fill = ML)) + geom_point(size=2.5,stroke=0.5,shape = 21,alpha = 0.8) + theme_bw() + 
+  scale_fill_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]), 
+                    guide = guide_legend(title = "ML Model", title.position = "top",override.aes = list(shape = 21), order = 1))+
+  labs(x = "Predicted TSS (mg/L)", y = "Standardized Residual")+ ylim(-6,6)+
   theme(text = element_text(size=15),legend.position = c(.35, 0.9), legend.direction='horizontal',
         legend.background = element_rect(fill="white",size=0.5, linetype="solid",colour ="black"),
         legend.text=element_text(size=8),legend.title=element_text(size=8))
 
-Cyplot <- ggplot(subset(COD.df, dataset %in% "Test"), aes(x=residual, color = ML, fill = ML)) + geom_histogram(alpha = 0.5, position="dodge", binwidth = 0.5) + labs(y = "count")  + xlim(-6,6)+
+Typlot <- ggplot(subset(TSS.df, dataset %in% "Test"), aes(x=residual, color = ML, fill = ML)) + geom_histogram(alpha = 0.5, position="dodge", binwidth = 0.5) + labs(y = "count") + xlim(-6,6)+
   scale_fill_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]),guide = guide_legend(title = "ML Model", title.position = "top", order = 1))+
   scale_color_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]),guide = guide_legend(title = "ML Model", title.position = "top", order = 1))+
   coord_flip() + theme_bw() + theme(text = element_text(size=15),legend.position="none",axis.title.y=element_blank(),
                                     axis.text.y=element_blank(),axis.ticks.y=element_blank(), plot.margin = unit(c(0.38,1,0.38,-0.5), "lines"))
-Csr.p <- ggarrange(COD.SR.p2, Cyplot, ncol = 2, nrow = 1, widths = c(3.5, 1), common.legend = F)
-Csr.p
+Tsr.p <- ggarrange(TSS.SR.p2, Typlot, ncol = 2, nrow = 1, widths = c(3.5, 1), common.legend = F)
+Tsr.p
 
 
+#### E.coli Predict ####
+set.seed(1234)
+tune.method <- trainControl(method = "repeatedcv", number=15, repeats=3, selectionFunction = "best")
+e.mod.fun <- function(mod.,inputT,...){
+  caret::train(E.coli ~ Group+Turb+NH4+NO3+Color+EC+pH
+               , inputT, method = mod., trControl = tune.method, na.action = na.pass, preProc = c("center", "scale", "nzv"
+               ),...)
+}
+
+set.seed(1234); WQ.E.lm <- #e.mod.fun("lm",WQ2.train)
+  readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_EST/E.coli_lm.rds")
+set.seed(1234); WQ.E.pls <- #e.mod.fun("pls",WQ2.train,tuneLength = 5)
+  readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_EST/E.coli_pls.rds")
+set.seed(1234); WQ.E.rf <- #e.mod.fun("rf",WQ2.train,ntree=25)
+  readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_EST/E.coli_rf.rds")
+set.seed(1234); WQ.E.knn <- #e.mod.fun("knn",WQ2.train,tuneGrid = expand.grid (k = seq(from = 3, to = 10, by = 1)))
+  readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_EST/E.coli_knn.rds")
+set.seed(1234); WQ.E.svm <- #e.mod.fun("svmRadial",WQ2.train,tuneGrid=expand.grid(.sigma=seq(from=0.01,to=0.05,by=0.01),.C=seq(from=1,to=5,by=0.5)))
+  readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_EST/E.coli_svm.rds")
+set.seed(1234); WQ.E.cub <- #e.mod.fun("cubist",WQ2.train,tuneGrid=expand.grid(.committees=seq(from=3,to=10,by=1),.neighbors=seq(from=3,to=9,by=1)))
+  readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_EST/E.coli_cub.rds")
+set.seed(1234); WQ.E.qrnn <- #e.mod.fun("qrnn",WQ2.train,tuneGrid=expand.grid(.n.hidden=seq(from=2,to=5,by=1),.penalty = 10^(seq(from = -2, to = 2, by = 0.5)),.bag=FALSE))
+  readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_EST/E.coli_qrnn.rds")
+
+#saveRDS(WQ.E.qrnn,"G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_EST/E.coli_qrnn.rds")
+
+
+###  E.coli Train Variables Importance ### 
+E.lm.Imp <- ggplot2::ggplot(varImp(WQ.E.lm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "E. coli-LM")
+E.qrnn.Imp <- ggplot2::ggplot(varImp(WQ.E.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "E. coli-RNN")
+E.pls.Imp <- ggplot2::ggplot(varImp(WQ.E.pls, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "E. coli-PLS")
+E.rf.Imp <- ggplot2::ggplot(varImp(WQ.E.rf, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "E. coli-RF")
+E.knn.Imp <- ggplot2::ggplot(varImp(WQ.E.knn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "E. coli-KNN")
+E.svm.Imp <- ggplot2::ggplot(varImp(WQ.E.svm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "E. coli-SVR")
+E.cub.Imp <- ggplot2::ggplot(varImp(WQ.E.cub, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "E. coli-CUB")
+E.varImp <- ggarrange(E.pls.Imp, E.knn.Imp, E.svm.Imp, E.rf.Imp, E.cub.Imp, E.qrnn.Imp,ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
+E.varImp
+#ggsave("E:/Dropbox/R project/Machine Learning/Figure/E_varImp.jpg",plot=E.varImp,width = 6, height = 4, dpi = 600)
+
+### TSS Train RMSE Boxplot ### 
+T.results <- resamples(list("qrnn" = WQ.T.qrnn, "knn" = WQ.T.knn, "svr" = WQ.T.svm,"pls" = WQ.T.pls, "rf" = WQ.T.rf, "CUB" = WQ.T.cub))
+T.RMSE <- data.frame(T.results$values$`qrnn~RMSE`,T.results$values$`knn~RMSE`,T.results$values$`svr~RMSE`,
+                     T.results$values$`pls~RMSE`,T.results$values$`rf~RMSE`,T.results$values$`CUB~RMSE`)
+colnames(T.RMSE) <- c("QRNN","KNN","SVR","PLS","RF","CUB")
+T.RMSE <- T.RMSE %>% gather(key = "Model", value = "RMSE", QRNN, KNN, SVR, PLS, RF, CUB) %>% convert_as_factor(Model)
+T.Ttest <- T.RMSE %>% pairwise_t_test(RMSE ~ Model, paired = TRUE, alt = c("two.sided"), conf.level = 0.99, p.adjust.method = "bonferroni") %>% add_xy_position(x = "Model")
+T.RMSE.p <- ggboxplot(T.RMSE, x = "Model", y = "RMSE",color = "black", legend = "none", order = c("PLS","KNN","SVR","RF","QRNN","CUB"),outlier.shape = NA) +
+  geom_point(data = T.RMSE, aes(x = Model, y = RMSE, colour = Model, alpha = 0.9), position = position_jitter(width = 0.2))+
+  geom_hline(yintercept = mean(T.RMSE$RMSE), linetype = 2) + 
+  coord_flex_cart(bottom=brackets_horizontal(), left=capped_vertical('none'))+
+  theme_bw()+labs(x = element_blank(), y = "RMSE (TSS mg/L)")+
+  theme(text = element_text(size=15),legend.title=element_blank(),legend.position = "none",
+        panel.border=element_blank(), axis.line = element_line(),legend.background = element_rect(colour='grey')) +
+  scale_color_manual(values = c("PLS"=colx(6)[1],"KNN"=colx(6)[2],"SVR"=colx(6)[3],"RF"=colx(6)[4],"QRNN"=colx(6)[5],"CUB"=colx(6)[6]),guide=guide_legend(title = "Algorithms", order = 1))
+T.RMSE.p
+
+### TSS Test RMSE Boxplot ### 
+tss.theme <- function(titl.,lab.data,...){
+  list(geom_point(aes(fill=dataset), size=7.25, shape=21, color="black", stroke=0.5, alpha=0.75),
+       theme_bw(),ylim(-50,1250),xlim(-50,1250),
+       scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = NULL, title.position = "top",override.aes = list(shape=21,size=2.5), order = 1)),
+       theme(text = element_text(size=8.5),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(0.15, 0.85)),
+       labs(x = "Predicted TSS (mg/L)", y = "Measured TSS (mg/L)",title = titl.),geom_abline(color = "black", linetype = 2, size = 1, alpha = 0.5),
+       geom_richtext(data = lab.data,aes(675, 150, label = label[1]),hjust = 0,size = 2.75,fill = "white", label.color = "black"),
+       ...)
+}
+
+### LM ###
+T.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.lm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.lm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.lm.df)
+T.lm.df <- T.lm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.lm.sr <- lm(X2 ~ X3, data=T.lm.df)
+T.lm.df <- cbind(T.lm.df, rstandard(T.lm.sr))
+colnames(T.lm.df) <- c("Sample","actual","predicted","dataset","residual")
+T.lm.df$dataset <-factor(T.lm.df$dataset  , levels=c("Train","Test"))
+T.lm.df$ML <- "LM"
+T.lm.L <- T.lm.df %>% group_by(dataset) %>%
+  summarise(RMSE = caret::RMSE(predicted,actual),
+            R2 = caret::R2(predicted,actual),
+            MAPE = MAPE(predicted,actual)) %>% ungroup()
+T.lm.L$label[1] <- paste("Train RMSE =", round(T.lm.L$RMSE[2], 0), "<br> Test RMSE =", round(T.lm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.lm.L$R2[1], 2), "<br> MAPE =", round(T.lm.L$MAPE[1], 1))
+T.lm.p <- ggplot(T.lm.df, aes(predicted, actual))+tss.theme(NULL,T.lm.L)+theme(legend.position="none")
+T.lm.p
+
+### QRNN ###
+T.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.qrnn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.qrnn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.qrnn.df)
+T.qrnn.df <- T.qrnn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.qrnn.sr <- lm(X2 ~ X3, data=T.qrnn.df)
+T.qrnn.df <- cbind(T.qrnn.df, rstandard(T.qrnn.sr))
+colnames(T.qrnn.df) <- c("Sample","actual","predicted","dataset","residual")
+T.qrnn.df$dataset <-factor(T.qrnn.df$dataset  , levels=c("Train","Test"))
+T.qrnn.df$ML <- "QRNN"
+T.qrnn.L <- T.qrnn.df %>% group_by(dataset) %>%
+  summarise(RMSE = caret::RMSE(predicted,actual),
+            R2 = caret::R2(predicted,actual),
+            MAPE = MAPE(predicted,actual)) %>% ungroup()
+T.qrnn.L$label[1] <- paste("Train RMSE =", round(T.qrnn.L$RMSE[2], 0), "<br> Test RMSE =", round(T.qrnn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.qrnn.L$R2[1], 2), "<br> MAPE =", round(T.qrnn.L$MAPE[1], 1))
+T.qrnn.p <- ggplot(T.qrnn.df, aes(predicted, actual))+tss.theme(NULL,T.qrnn.L)+theme(legend.position="none")
+T.qrnn.p
+
+### PLS ###
+T.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.pls, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.pls, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.pls.df)
+T.pls.df <- T.pls.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.pls.sr <- lm(X2 ~ X3, data=T.pls.df)
+T.pls.df <- cbind(T.pls.df, rstandard(T.pls.sr))
+colnames(T.pls.df) <- c("Sample","actual","predicted","dataset","residual")
+T.pls.df$dataset <-factor(T.pls.df$dataset  , levels=c("Train","Test"))
+T.pls.df$ML <- "PLS"
+T.pls.L <- T.pls.df %>% group_by(dataset) %>%
+  summarise(RMSE = caret::RMSE(predicted,actual),
+            R2 = caret::R2(predicted,actual),
+            MAPE = MAPE(predicted,actual)) %>% ungroup()
+T.pls.L$label[1] <- paste("Train RMSE =", round(T.pls.L$RMSE[2], 0), "<br> Test RMSE =", round(T.pls.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.pls.L$R2[1], 2), "<br> MAPE =", round(T.pls.L$MAPE[1], 1))
+T.pls.p <- ggplot(T.pls.df, aes(predicted, actual))+tss.theme(NULL,T.pls.L)+theme(legend.position="none")
+T.pls.p
+
+### KNN ###
+T.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.knn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.knn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.knn.df)
+T.knn.df <- T.knn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.knn.sr <- lm(X2 ~ X3, data=T.knn.df)
+T.knn.df <- cbind(T.knn.df, rstandard(T.knn.sr))
+colnames(T.knn.df) <- c("Sample","actual","predicted","dataset","residual")
+T.knn.df$dataset <-factor(T.knn.df$dataset  , levels=c("Train","Test"))
+T.knn.df$ML <- "KNN"
+T.knn.L <- T.knn.df %>% group_by(dataset) %>%
+  summarise(RMSE = caret::RMSE(predicted,actual),
+            R2 = caret::R2(predicted,actual),
+            MAPE = MAPE(predicted,actual)) %>% ungroup()
+T.knn.L$label[1] <- paste("Train RMSE =", round(T.knn.L$RMSE[2], 0), "<br> Test RMSE =", round(T.knn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.knn.L$R2[1], 2), "<br> MAPE =", round(T.knn.L$MAPE[1], 1))
+T.knn.p <- ggplot(T.knn.df, aes(predicted, actual))+tss.theme(NULL,T.knn.L)+theme(legend.position="none")
+T.knn.p
+
+### SVM ###
+T.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.svm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.svm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.svm.df)
+T.svm.df <- T.svm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.svm.sr <- lm(X2 ~ X3, data=T.svm.df)
+T.svm.df <- cbind(T.svm.df, rstandard(T.svm.sr))
+colnames(T.svm.df) <- c("Sample","actual","predicted","dataset","residual")
+T.svm.df$dataset <-factor(T.svm.df$dataset  , levels=c("Train","Test"))
+T.svm.df$ML <- "SVR"
+T.svm.L <- T.svm.df %>% group_by(dataset) %>%
+  summarise(RMSE = caret::RMSE(predicted,actual),
+            R2 = caret::R2(predicted,actual),
+            MAPE = MAPE(predicted,actual)) %>% ungroup()
+T.svm.L$label[1] <- paste("Train RMSE =", round(T.svm.L$RMSE[2], 0), "<br> Test RMSE =", round(T.svm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.svm.L$R2[1], 2), "<br> MAPE =", round(T.svm.L$MAPE[1], 1))
+T.svm.p <- ggplot(T.svm.df, aes(predicted, actual))+tss.theme(NULL,T.svm.L)+theme(legend.position="none")
+T.svm.p
+
+#### RF ####
+T.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.rf, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.rf, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.rf.df)
+T.rf.df <- T.rf.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.rf.sr <- lm(X2 ~ X3, data=T.rf.df)
+T.rf.df <- cbind(T.rf.df, rstandard(T.rf.sr))
+colnames(T.rf.df) <- c("Sample","actual","predicted","dataset","residual")
+T.rf.df$dataset <-factor(T.rf.df$dataset  , levels=c("Train","Test"))
+T.rf.df$ML <- "RF"
+T.rf.L <- T.rf.df %>% group_by(dataset) %>%
+  summarise(RMSE = caret::RMSE(predicted,actual),
+            R2 = caret::R2(predicted,actual),
+            MAPE = MAPE(predicted,actual)) %>% ungroup()
+T.rf.L$label[1] <- paste("Train RMSE =", round(T.rf.L$RMSE[2], 0), "<br> Test RMSE =", round(T.rf.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.rf.L$R2[1], 2), "<br> MAPE =", round(T.rf.L$MAPE[1], 1))
+T.rf.p <- ggplot(T.rf.df, aes(predicted, actual))+tss.theme(NULL,T.rf.L)+theme(legend.position="none")
+T.rf.p
+
+#### CUB ####
+T.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$TSS, abs(predict.train(WQ.T.cub, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
+T.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$TSS, abs(predict.train(WQ.T.cub, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),T.cub.df)
+T.cub.df <- T.cub.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+T.cub.sr <- lm(X2 ~ X3, data=T.cub.df)
+T.cub.df <- cbind(T.cub.df, rstandard(T.cub.sr))
+colnames(T.cub.df) <- c("Sample","actual","predicted","dataset","residual")
+T.cub.df$dataset <-factor(T.cub.df$dataset  , levels=c("Train","Test"))
+T.cub.df$ML <- "CUB"
+T.cub.L <- T.cub.df %>% group_by(dataset) %>%
+  summarise(RMSE = caret::RMSE(predicted,actual),
+            R2 = caret::R2(predicted,actual),
+            MAPE = MAPE(predicted,actual)) %>% ungroup()
+T.cub.L$label[1] <- paste("Train RMSE =", round(T.cub.L$RMSE[2], 0), "<br> Test RMSE =", round(T.cub.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(T.cub.L$R2[1], 2), "<br> MAPE =", 24.8)
+T.cub.p <- ggplot(T.cub.df, aes(predicted, actual))+tss.theme(NULL,T.cub.L)+theme(legend.position="none")
+T.cub.p
+
+### Save TSS Result Scatter Plot ###
+TSS.R.p <- ggarrange(T.pls.p, T.svm.p, T.cub.p, T.rnn.p, labels = "AUTO", ncol=4,nrow = 1, align = "v")
+ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-2.jpg",plot=TSS.R.p,width = 12, height = 2, dpi = 600)
+
+### TSS Overall Scatter Plot ###
+TSS.df <- rbind(T.qrnn.df,T.pls.df,T.svm.df,T.cub.df)
+TSS.df$ML <-factor(TSS.df$ML , levels=c("PLS","SVR","CUB","QRNN"))
+TSS.df.L <- rbind(T.pls.L,T.svm.L,T.cub.L,T.qrnn.L)
+TSS.df.L$ML <- c("PLS","PLS","SVR","SVR","CUB","CUB","QRNN","QRNN")
+TSS.df.L$label <- gsub("<br>", ";", TSS.df.L$label)
+
+TSS.df.p <- ggplot(subset(TSS.df, dataset %in% "Test"),aes(predicted, actual, fill = ML)) + geom_point(size=2.5,stroke=0.5,shape = 21,alpha = 0.8) + theme_bw() + 
+  geom_abline(color = "black", linetype = 2, size = 1, alpha = 0.4)+
+  scale_fill_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]), 
+                    guide = guide_legend(title = "ML Model", title.position = "top",override.aes = list(shape = 21), order = 1))+
+  scale_shape_manual(values = c(16,16,16,16,16), guide = guide_legend(title = "Sampling Location", title.position = "top", order = 2))+
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(1,10^3),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(1,10^3),
+                labels = scales::trans_format("log10", scales::math_format (10^.x)))+
+  labs(x = "Predicted TSS (mg/L)", y = "Measured TSS (mg/L)")+
+  theme(text = element_text(size=15),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = "none", legend.box = "horizontal")
+TSS.df.p
+
+### TSS Result Standardized Residual Plot ###
+t.sr.theme <- function(titl.,...){
+  list(geom_point(aes(fill = Sample),shape=21,size=2,color="black", stroke = 0.5),theme_bw(),ylim(-3,3),xlim(-200,1250),
+       scale_alpha_continuous(limits = c(0,3), breaks = c(0,1,2,3), guide = guide_legend(title = "Standardized residual", title.position = "top", order = 2)),
+       scale_fill_manual(values = c(colx(5)), 
+                         guide = guide_legend(title = "Sampling location", title.position = "left",override.aes = list(shape = 21), order = 1)),
+       theme(text = element_text(size=7),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(.9, 0.3)),
+       labs(title = titl. ,x = "Predicted TSS (mg/L)", y = "Standardized Residual"))
+}
+
+T.qrnn.p2 <- ggplot(data = T.qrnn.df, aes(predicted, residual)) + t.sr.theme("TSS: QRNN") + guides(alpha=FALSE)
+T.pls.p2 <- ggplot(data = T.pls.df, aes(predicted, residual)) + t.sr.theme("TSS: PLS") + guides(alpha=FALSE)
+T.knn.p2 <- ggplot(data = T.knn.df, aes(predicted, residual)) + t.sr.theme("TSS: KNN") + guides(alpha=FALSE)
+T.rf.p2 <- ggplot(data = T.rf.df, aes(predicted, residual)) + t.sr.theme("TSS: RF") + guides(alpha=FALSE)
+T.svm.p2 <- ggplot(data = T.svm.df, aes(predicted, residual)) + t.sr.theme("TSS: SVR") + guides(alpha=FALSE)
+T.cub.p2 <- ggplot(data = T.cub.df, aes(predicted, residual)) + t.sr.theme("TSS: CUB") + guides(alpha=FALSE)
+TSS.SR.p <- ggarrange(T.pls.p2, T.svm.p2, T.cub.p2, T.qrnn.p2, labels = "AUTO", ncol=4,nrow = 1, align = "v",  common.legend = TRUE,legend = "bottom")
+TSS.SR.p
+
+TSS.SR.p2 <- ggplot(subset(TSS.df, dataset %in% "Test"),aes(predicted, residual, fill = ML)) + geom_point(size=2.5,stroke=0.5,shape = 21,alpha = 0.8) + theme_bw() + 
+  scale_fill_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]), 
+                    guide = guide_legend(title = "ML Model", title.position = "top",override.aes = list(shape = 21), order = 1))+
+  labs(x = "Predicted TSS (mg/L)", y = "Standardized Residual")+ ylim(-6,6)+
+  theme(text = element_text(size=15),legend.position = c(.35, 0.9), legend.direction='horizontal',
+        legend.background = element_rect(fill="white",size=0.5, linetype="solid",colour ="black"),
+        legend.text=element_text(size=8),legend.title=element_text(size=8))
+
+Typlot <- ggplot(subset(TSS.df, dataset %in% "Test"), aes(x=residual, color = ML, fill = ML)) + geom_histogram(alpha = 0.5, position="dodge", binwidth = 0.5) + labs(y = "count") + xlim(-6,6)+
+  scale_fill_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]),guide = guide_legend(title = "ML Model", title.position = "top", order = 1))+
+  scale_color_manual(values = c("PLS"=colx(4)[1],"SVR"=colx(4)[2],"CUB"=colx(4)[3],"QRNN"=colx(4)[4]),guide = guide_legend(title = "ML Model", title.position = "top", order = 1))+
+  coord_flip() + theme_bw() + theme(text = element_text(size=15),legend.position="none",axis.title.y=element_blank(),
+                                    axis.text.y=element_blank(),axis.ticks.y=element_blank(), plot.margin = unit(c(0.38,1,0.38,-0.5), "lines"))
+Tsr.p <- ggarrange(TSS.SR.p2, Typlot, ncol = 2, nrow = 1, widths = c(3.5, 1), common.legend = F)
+Tsr.p
 
 
 
