@@ -3,7 +3,7 @@ pacman::p_load(plyr,dplyr,reshape2,stringr,lubridate,readxl,openxlsx,janitor,ggp
                officedown,officer,flextable,car,C50,GGally,ggResidpanel,ggfortify,caretEnsemble,randomForest,corrplot,neuralnet,lemon,Hmisc,scales,
                glue,ggtext,png,gtools,ggrepel,rvg,gdata,scales,nnet,xgboost,correlation,psych,corrgram,jpeg,qrnn,pls,kernlab)
 colx <- colorRampPalette(c("#16068a","#9e189d","#fdb32e"))
-colx2 <- colorRampPalette(c("#007abf","#f7b81a"))
+colx2 <- colorRampPalette(c("#264653","#2a9d8e","#e9c46b","#f3a261","#e66f51"))
 
 #### Start ####
 Raw <- read.csv(file = 'G:/My Drive/R project/GitHub/MLsensor/Raw_data/Data_ML.csv',header = T, sep = ",")
@@ -243,11 +243,72 @@ lower_fn <- function(data, mapping, ...) {
     geom_smooth(color = '#ff8a8a', method='lm', size=0.5,se=F,...)+theme_bw()
 }
 
-WQ2.Cor <- ggpairs(subset(subset(WQ2, Group %in% c("1")), select = -c(Group,E.coli2)), 
+WQ2.Cor <- ggpairs(subset(WQ2, select = -c(Group,E.coli2)), 
                       upper = list(continuous = upper_fn), lower = list(continuous = lower_fn), diag = list(continuous = diag_fn))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size=5), axis.text.y = element_text(size=5),text = element_text(size=6))
 WQ2.Cor
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Correlation.jpg",plot=WQ2.Cor,width = 6, height = 6, dpi = 300)
+
+
+#### Correlation with Sample point ####
+upper_fn2 <- function(data, mapping, method="pearson", use="pairwise", ...){
+  ggally_cor(data = data, mapping = mapping, size = 2.3, fontface = "bold", ...) + 
+    theme_void()
+}
+
+diag_fn <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_density(alpha=.2,...)+theme_bw()
+}
+
+lower_fn2 <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_point(alpha=0.3, size=0.9) +
+    geom_smooth(method='lm', size=0.5, se = FALSE,...)+theme_bw()
+}
+
+WQ2.cor <- WQ2 %>% within(Group <- factor(Group, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
+colnames(WQ2.cor) <- c("Group", "COD", "sCOD","pCOD","TSS","E.coli","Color","Trubidity","EC","pH","NH4","NO3","Temperature","E.coli2") 
+WQ2.cor.p <- ggpairs(WQ2.cor[c(1,2,5:12)],aes(fill = Group, colour = Group, alpha = 0.4), #title="Correlations Among Variables",
+                     upper = list(continuous = upper_fn2), 
+                     lower = list(continuous = lower_fn2), 
+                     diag = list(continuous = diag_fn))+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size=5), axis.text.y = element_text(size=5),panel.grid.major = element_blank())+
+  scale_fill_manual(values = c(colx2(5)))+
+  scale_color_manual(values = c(colx2(5)))
+WQ2.cor.p
+
+
+#### Correlation Table ####
+colFn <- colorRampPalette(c("#4477AA", "#ffffff", "#BB4444"), interpolate ='spline')
+col_palette <- colFn(length(seq(-1,1, length=100)))
+colourer <- col_numeric(palette = col_palette,domain = c(-1, 1))
+
+AllCorrelation <- round(cor(subset(WQ2.cor, select = -c(Group,E.coli2)), method = "pearson", use="pairwise"),3) %>%
+  subset(select = c("COD","TSS","E.coli")) %>% as.data.frame()
+S1Correlation <- round(cor(subset(filter(WQ2.cor, Group == "Influent"), select = -c(Group,E.coli2)), method = "pearson", use="pairwise"),3) %>%
+  subset(select = c("COD","TSS","E.coli")) %>% as.data.frame()
+S2Correlation <- round(cor(subset(filter(WQ2.cor, Group == "AnMBR"), select = -c(Group,E.coli2)), method = "pearson", use="pairwise"),3) %>%
+  subset(select = c("COD","TSS","E.coli")) %>% as.data.frame()
+S3Correlation <- round(cor(subset(filter(WQ2.cor, Group == "Permeate"), select = -c(Group,E.coli2)), method = "pearson", use="pairwise"),3) %>%
+  subset(select = c("COD","TSS","E.coli")) %>% as.data.frame()
+S4Correlation <- round(cor(subset(filter(WQ2.cor, Group == "Post-NCS"), select = -c(Group,E.coli2)), method = "pearson", use="pairwise"),3) %>%
+  subset(select = c("COD","TSS","E.coli")) %>% as.data.frame()
+S5Correlation <- round(cor(subset(filter(WQ2.cor, Group == "Effluent"), select = -c(Group,E.coli2)), method = "pearson", use="pairwise"),3) %>%
+  subset(select = c("COD","TSS","E.coli")) %>% as.data.frame()
+
+Corr.df0 <- data.frame(AllCorrelation,S1Correlation,S2Correlation,S3Correlation,S4Correlation,S5Correlation)
+Corr.df <- data.frame(lapply(Corr.df0,as.numeric))
+Corr.df <- cbind(row.names(Corr.df0),Corr.df)
+
+Corr.Tb <- flextable(Corr.df) %>% delete_part(part = "header") %>%
+  add_header_row(values = c("Parameters",rep(c("COD","TSS","E.coli"), 6))) %>%
+  add_header_row(values = c("",rep("All", 3),rep("Influent", 3),rep("AnMBR", 3),rep("Permeate", 3),rep("Post-NCS", 3),rep("Effluent", 3))) %>%
+  bg(j=2:19,part = "body", bg = colourer)%>%
+  autofit(part = "all") %>% align(align = "center", part = "all") %>% merge_h(part = "header", i = 1:2) %>% merge_v(part = "header") %>%
+  colformat_double(digits = 3, na_str = "N/A")
+theme_vanilla(set_table_properties(Corr.Tb, width = 1, layout = "autofit")) %>% fit_to_width(11) %>%
+  align_text_col(align ="center",footer=F)%>%align(i=1:12,j=1,align="left",part=c("body"))%>%align(i=1,j=1,align="left",part="header")
 
 
 #### Feature Elimination Analysis ####
@@ -268,19 +329,19 @@ e.rfe.fun <- function(mod.,inputT,...){
 
 #### COD REF Models ####
 rfe.C.lm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_lm.rds")
-#c.rfe.fun("lm",WQ.Cp)
+#c.rfe.fun("lm",WQ2)
 rfe.C.pls <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_pls.rds")
-#c.rfe.fun("pls",WQ.Cp,tuneLength = 5)
+#c.rfe.fun("pls",WQ2,tuneLength = 5)
 rfe.C.rf <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_rf.rds")
-#c.rfe.fun("rf",WQ.Cp)
+#c.rfe.fun("rf",WQ2)
 rfe.C.knn <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_knn.rds")
-#c.rfe.fun("knn",WQ.Cp)
+#c.rfe.fun("knn",WQ2)
 rfe.C.svm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_svm.rds")
-#c.rfe.fun("svmRadial",WQ.Cp)
+#c.rfe.fun("svmRadial",WQ2)
 rfe.C.cub <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_cub.rds")
-#c.rfe.fun("cubist",WQ.Cp)
+#c.rfe.fun("cubist",WQ2)
 rfe.C.net <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_rnn.rds")
-#c.rfe.fun("qrnn",WQ.Cp)
+#c.rfe.fun("qrnn",WQ2)
 
 #saveRDS(rfe.C.net,"G:/My Drive/R project/GitHub/MLsensor/Save_model/COD_RFE/C_rfe_rnn.rds")
 
@@ -361,19 +422,19 @@ rfe.C_Plot
 
 #### TSS REF Models ####
 rfe.T.lm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_lm.rds")
-#t.rfe.fun("lm",WQ.Cp)
+#t.rfe.fun("lm",WQ2)
 rfe.T.pls <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_pls.rds")
-#t.rfe.fun("pls",WQ.Cp,tuneLength = 5)
+#t.rfe.fun("pls",WQ2,tuneLength = 5)
 rfe.T.rf <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_rf.rds")
-#t.rfe.fun("rf",WQ.Cp)
+#t.rfe.fun("rf",WQ2)
 rfe.T.knn <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_knn.rds")
-#t.rfe.fun("knn",WQ.Cp)
+#t.rfe.fun("knn",WQ2)
 rfe.T.svm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_svm.rds")
-#t.rfe.fun("svmRadial",WQ.Cp)
+#t.rfe.fun("svmRadial",WQ2)
 rfe.T.cub <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_cub.rds")
-#t.rfe.fun("cubist",WQ.Cp)
+#t.rfe.fun("cubist",WQ2)
 rfe.T.net <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_rnn.rds")
-#t.rfe.fun("qrnn",WQ.Cp)
+#t.rfe.fun("qrnn",WQ2)
 
 #saveRDS(rfe.T.net,"G:/My Drive/R project/GitHub/MLsensor/Save_model/TSS_RFE/T_rfe_rnn.rds")
 
@@ -442,19 +503,19 @@ rfe.T_Plot <- ggarrange(rfe.T.net_Plot, rfe.T.pls_Plot, rfe.T.knn_Plot,rfe.T.svm
 
 #### E.coli REF Models ####
 rfe.E.lm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_lm.rds")
-#e.rfe.fun("lm",WQ.Cp)
+#e.rfe.fun("lm",WQ2)
 rfe.E.pls <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_pls.rds")
-#e.rfe.fun("pls",WQ.Cp,tuneLength = 5)
+#e.rfe.fun("pls",WQ2,tuneLength = 5)
 rfe.E.rf <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_rf.rds")
-#e.rfe.fun("rf",WQ.Cp)
+#e.rfe.fun("rf",WQ2)
 rfe.E.knn <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_knn.rds")
-#e.rfe.fun("knn",WQ.Cp)
+#e.rfe.fun("knn",WQ2)
 rfe.E.svm <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_svm.rds")
-#e.rfe.fun("svmRadial",WQ.Cp)
+#e.rfe.fun("svmRadial",WQ2)
 rfe.E.cub <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_cub.rds")
-#e.rfe.fun("cubist",WQ.Cp)
+#e.rfe.fun("cubist",WQ2)
 rfe.E.net <- readRDS("G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_rnn.rds")
-#e.rfe.fun("qrnn",WQ.Cp)
+#e.rfe.fun("qrnn",WQ2)
 
 #saveRDS(rfe.E.net,"G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_RFE/E_rfe_rnn.rds")
 
@@ -554,7 +615,7 @@ k_fold <- data.frame(k = numeric(), method = character(), accuracy = numeric(), 
 for (i in 1:length(k_values)) {
   for (j in 1:length(models)) {
     set.seed(123)
-    model <- train(COD ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ.Cp, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
+    model <- train(COD ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ2, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
     acc <- mean(model$resample$RMSE)
     accsd <- sd(model$resample$RMSE)
     k_fold <- rbind(k_fold, data.frame(k = k_values[i], method = models[j], accuracy = acc, std = accsd, par = "COD"))
@@ -564,7 +625,7 @@ for (i in 1:length(k_values)) {
 for (i in 1:length(k_values)) {
   for (j in 1:length(models)) {
     set.seed(123)
-    model <- train(TSS ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ.Cp, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
+    model <- train(TSS ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ2, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
     acc <- mean(model$resample$RMSE)
     accsd <- sd(model$resample$RMSE)
     k_fold <- rbind(k_fold, data.frame(k = k_values[i], method = models[j], accuracy = acc, std = accsd, par = "TSS"))
@@ -574,7 +635,7 @@ for (i in 1:length(k_values)) {
 for (i in 1:length(k_values)) {
   for (j in 1:length(models)) {
     set.seed(123)
-    model <- train(E.coli ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ.Cp, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
+    model <- train(E.coli ~ Group+Turb+NH4+NO3+Temp+Color+EC+pH, data = WQ2, method = models[j], trControl = trainControl(method = "cv", number = k_values[i]))
     acc <- mean(model$resample$RMSE)
     accsd <- sd(model$resample$RMSE)
     k_fold <- rbind(k_fold, data.frame(k = k_values[i], method = models[j], accuracy = acc, std = accsd, par = "E.coli"))
@@ -645,7 +706,7 @@ C.cub.Imp <- ggplot(varImp(WQ.C.cub, scale = T))+theme_bw()+labs(x=element_blank
 C.qrnn.Imp <- ggplot(varImp(WQ.C.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-QRNN")
 C.varImp <- ggarrange(C.pls.Imp, C.svm.Imp, C.cub.Imp,C.qrnn.Imp, ncol=2, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
 C.varImp
-#ggsave("E:/Dropbox/R project/Machine Learning/Figure/C_varImp.jpg",plot=C.varImp,width = 6, height = 4, dpi = 300)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/C_varImp.jpg",plot=C.varImp,width = 6, height = 4, dpi = 300)
 
 ### COD Train RMSE Boxplot ### 
 C.results <- resamples(list("qrnn" = WQ.C.qrnn, "knn" = WQ.C.knn, "svr" = WQ.C.svm,"pls" = WQ.C.pls, "rf" = WQ.C.rf, "CUB" = WQ.C.cub))
