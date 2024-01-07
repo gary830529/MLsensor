@@ -1413,16 +1413,17 @@ set.seed(321); WQ.E2.svm <- #e2.mod.fun("svmRadial",WQ2.train,tuneGrid=expand.gr
 #set.seed(1234); WQ.E2.xgb <- e2.mod.fun("xgbLinear",WQ2.train)
 #saveRDS(WQ.E2.svm,"G:/My Drive/R project/GitHub/MLsensor/Save_model/Ecoli_CLS/E.coli2_svm.rds")
 
+### RF ###
 Rf_pred <- predict(WQ.E2.rf, newdata = WQ2.test)
 Rf_e2_result <- confusionMatrix(Rf_pred, WQ2.test$E.coli2)
 E2_R_df <- data.frame(Rf_e2_result$byClass, Class = c("H","M","L","LDL"), Model = "RF") 
 
-
+### KNN ###
 knn_pred <- predict(WQ.E2.knn, newdata = WQ2.test)
 knn_e2_result <- confusionMatrix(knn_pred, WQ2.test$E.coli2)
 E2_R_df <- rbind(E2_R_df, data.frame(knn_e2_result$byClass, Class = c("H","M","L","LDL"), Model = "KNN") )
 
-
+### SVM ###
 svm_pred <- predict(WQ.E2.knn, newdata = WQ2.test)
 svm_e2_result <- confusionMatrix(svm_pred, WQ2.test$E.coli2)
 E2_R_df <- rbind(E2_R_df, data.frame(svm_e2_result$byClass, Class = c("H","M","L","LDL"), Model = "SVM") )
@@ -1430,6 +1431,7 @@ E2_R_df <- rbind(E2_R_df, data.frame(svm_e2_result$byClass, Class = c("H","M","L
 E2_R_df <- E2_R_df %>% 
   reshape2::melt(id.vars=c("Model", "Class"))
 
+### Result Plot ###
 E2_R_df$Class <- factor(E2_R_df$Class , levels=c("H","M","L","LDL"))
 E2_R_df$Model <- factor(E2_R_df$Model , levels=c("RF","KNN","SVM"))
 E2_R_df$variable <- ifelse(E2_R_df$variable == "Balanced.Accuracy","Balanced Accuracy", as.character(E2_R_df$variable))
@@ -1440,3 +1442,8 @@ E2plot <- ggplot(subset(E2_R_df, variable %in% c("Balanced Accuracy", "Precision
   scale_fill_manual(values = c("RF" = colx(3)[1], "KNN" = colx(3)[2], "SVM" = colx(3)[3])) +
   theme_bw()
 E2plot
+
+
+#### COD Result by Sample point ####
+
+
