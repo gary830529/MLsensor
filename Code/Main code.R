@@ -437,7 +437,7 @@ rfe.T.cub_Plot <- ggplot(rfe.T.cub,aes(rfe.T.cub$variables,rfe.T.cub$results$RMS
 
 rfe.T_Plot <- ggarrange(rfe.T.net_Plot, rfe.T.pls_Plot, rfe.T.knn_Plot,rfe.T.svm_Plot, rfe.T.rf_Plot, rfe.T.cub_Plot,
                         labels = "AUTO", nrow=3, ncol = 2, align = "v")
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3-2.jpg",plot=rfe.T_Plot,width = 6, height = 4, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3-2.jpg",plot=rfe.T_Plot,width = 6, height = 4, dpi = 300)
 
 
 #### E.coli REF Models ####
@@ -529,14 +529,14 @@ rfe.E.cub_Plot <- ggplot(rfe.E.cub,aes(rfe.E.cub$variables,rfe.E.cub$results$RMS
 rfe.E_Plot <- ggarrange(rfe.E.net_Plot, rfe.E.pls_Plot,rfe.E.knn_Plot,rfe.E.svm_Plot, rfe.E.rf_Plot,rfe.E.cub_Plot,
                         labels = "AUTO", nrow=3, ncol = 2, align = "v")
 
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3-3.jpg",plot=rfe.E_Plot,width = 6, height = 4, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3-3.jpg",plot=rfe.E_Plot,width = 6, height = 4, dpi = 300)
 
 #### REF Plot ####
 REF.R <- ggarrange(rfe.C.pls_Plot, rfe.C.svm_Plot, rfe.C.cub_Plot, rfe.C.net_Plot,
                       rfe.T.pls_Plot, rfe.T.svm_Plot, rfe.T.cub_Plot, rfe.T.net_Plot,
                       rfe.E.pls_Plot, rfe.E.svm_Plot, rfe.E.cub_Plot, rfe.E.net_Plot,
                       labels = "AUTO", ncol=4,nrow = 3, align = "v")
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3.tiff",plot=REF.R,width = 10, height = 5, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS3.tiff",plot=REF.R,width = 10, height = 5, dpi = 300)
 
 
 #### Test & Train Datasets (Separate 70/30) ####
@@ -605,7 +605,7 @@ k_plot <- ggplot(subset(k_df, method %in% c("PLS", "SVR", "CUB", "QRNN")), aes(x
         strip.background=element_blank(), #strip.text.y=element_text(size=8,face="bold.italic"), 
         axis.line=element_line(),panel.grid.major = element_blank())
 k_plot
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS1.tiff",plot=k_plot,width = 6, height = 4, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS1.tiff",plot=k_plot,width = 6, height = 4, dpi = 300)
 
 
 #### COD Predict ####
@@ -645,7 +645,7 @@ C.cub.Imp <- ggplot(varImp(WQ.C.cub, scale = T))+theme_bw()+labs(x=element_blank
 C.qrnn.Imp <- ggplot(varImp(WQ.C.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "COD-QRNN")
 C.varImp <- ggarrange(C.pls.Imp, C.svm.Imp, C.cub.Imp,C.qrnn.Imp, ncol=2, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
 C.varImp
-#ggsave("E:/Dropbox/R project/Machine Learning/Figure/C_varImp.jpg",plot=C.varImp,width = 6, height = 4, dpi = 600)
+#ggsave("E:/Dropbox/R project/Machine Learning/Figure/C_varImp.jpg",plot=C.varImp,width = 6, height = 4, dpi = 300)
 
 ### COD Train RMSE Boxplot ### 
 C.results <- resamples(list("qrnn" = WQ.C.qrnn, "knn" = WQ.C.knn, "svr" = WQ.C.svm,"pls" = WQ.C.pls, "rf" = WQ.C.rf, "CUB" = WQ.C.cub))
@@ -796,7 +796,7 @@ C.cub.p
 
 ### Save COD Result Scatter Plot ###
 COD.R.p <- ggarrange(C.pls.p,C.svm.p,C.cub.p,C.qrnn.p,labels = "AUTO", ncol=4,nrow = 1, align = "v")
-ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-1.jpg",plot=COD.R.p,width = 12, height = 2, dpi = 600)
+ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-1.jpg",plot=COD.R.p,width = 12, height = 2, dpi = 300)
 
 ### COD Overall Scatter Plot ###
 COD.df <- rbind(C.qrnn.df,C.pls.df,C.svm.df,C.cub.df)
@@ -894,7 +894,7 @@ T.cub.Imp <- ggplot2::ggplot(varImp(WQ.T.cub, scale = T))+theme_bw()+labs(x=elem
 T.qrnn.Imp <- ggplot2::ggplot(varImp(WQ.T.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "TSS-QRNN")
 T.varImp <- ggarrange(T.lm.Imp, T.pls.Imp, T.knn.Imp, T.svm.Imp, T.rf.Imp, T.qrnn.Imp,ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
 T.varImp
-#ggsave("E:/Dropbox/R project/Machine Learning/Figure/T_varImp.jpg",plot=T.varImp,width = 6, height = 4, dpi = 600)
+#ggsave("E:/Dropbox/R project/Machine Learning/Figure/T_varImp.jpg",plot=T.varImp,width = 6, height = 4, dpi = 300)
 
 ### TSS Train RMSE Boxplot ### 
 T.results <- resamples(list("qrnn" = WQ.T.qrnn, "knn" = WQ.T.knn, "svr" = WQ.T.svm,"pls" = WQ.T.pls, "rf" = WQ.T.rf, "CUB" = WQ.T.cub))
@@ -1045,7 +1045,7 @@ T.cub.p
 
 ### Save TSS Result Scatter Plot ###
 TSS.R.p <- ggarrange(T.pls.p, T.svm.p, T.cub.p, T.qrnn.p, labels = "AUTO", ncol=4,nrow = 1, align = "v")
-ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-2.jpg",plot=TSS.R.p,width = 12, height = 2, dpi = 600)
+ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-2.jpg",plot=TSS.R.p,width = 12, height = 2, dpi = 300)
 
 ### TSS Overall Scatter Plot ###
 TSS.df <- rbind(T.qrnn.df,T.pls.df,T.svm.df,T.cub.df)
@@ -1140,7 +1140,7 @@ E.svm.Imp <- ggplot2::ggplot(varImp(WQ.E.svm, scale = T))+theme_bw()+labs(x=elem
 E.cub.Imp <- ggplot2::ggplot(varImp(WQ.E.cub, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "E. coli-CUB")
 E.varImp <- ggarrange(E.pls.Imp, E.knn.Imp, E.svm.Imp, E.rf.Imp, E.cub.Imp, E.qrnn.Imp,ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
 E.varImp
-#ggsave("E:/Dropbox/R project/Machine Learning/Figure/E_varImp.jpg",plot=E.varImp,width = 6, height = 4, dpi = 600)
+#ggsave("E:/Dropbox/R project/Machine Learning/Figure/E_varImp.jpg",plot=E.varImp,width = 6, height = 4, dpi = 300)
 
 ### E.coli Train RMSE Boxplot ### 
 E.results <- resamples(list("qrnn" = WQ.E.qrnn, "knn" = WQ.E.knn, "svr" = WQ.E.svm,"pls" = WQ.E.pls, "rf" = WQ.E.rf, "CUB" = WQ.E.cub))
@@ -1294,7 +1294,7 @@ E.cub.p
 
 ### Save E.coli Result Scatter Plot ###
 E.coli.R.p <- ggarrange(E.pls.p, E.svm.p, E.cub.p, E.qrnn.p, labels = "AUTO", ncol=4,nrow = 1, align = "v")
-ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-3.jpg",plot=E.coli.R.p,width = 12, height = 2, dpi = 600)
+ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5-3.jpg",plot=E.coli.R.p,width = 12, height = 2, dpi = 300)
 
 ### E.coli Overall Scatter Plot ###
 E.coli.df <- rbind(E.qrnn.df,E.pls.df,E.svm.df,E.cub.df)
@@ -1359,7 +1359,7 @@ Result.p <- ggarrange(C.pls.p, C.rf.p, C.cub.p, C.qrnn.p,
                       T.pls.p, T.rf.p, T.cub.p, T.qrnn.p,
                       E.pls.p, E.rf.p, E.cub.p, E.qrnn.p,
                       labels = "AUTO", ncol=4,nrow = 3, align = "v")
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5.tiff",plot=Result.p,width = 12, height = 6, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5.tiff",plot=Result.p,width = 12, height = 6, dpi = 300)
 
 p2_legend <- get_legend(C.pls.p+theme(legend.text = element_text(size=14),legend.title = element_text(size=14), legend.key.height= unit(1, 'cm'),legend.key.width= unit(1, 'cm'),legend.key=element_blank()))
 p2_legend <- ggarrange(NULL, p2_legend, NULL, ncol = 3, widths = c(2.5,2,1))
@@ -1377,22 +1377,22 @@ Result.p <- ggarrange(C.pls.p+theme(legend.position="none")+theme(axis.title.x=e
                       ncol=3,nrow = 4, align = "v",  common.legend = F, heights = c(1,1,1,1.2))
 
 Result.p <- ggarrange(Result.p, p2_legend, nrow=2, heights=c(20, 1))
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5.tiff",plot=Result.p,width = 18/2, height = 17/2, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Figure5.tiff",plot=Result.p,width = 18/2, height = 17/2, dpi = 300)
 
 Result.I <- ggarrange(C.pls.Imp, C.svm.Imp, C.cub.Imp, C.qrnn.Imp,
                       T.pls.Imp, T.svm.Imp, T.cub.Imp, T.qrnn.Imp,
                       E.pls.Imp, E.svm.Imp, E.cub.Imp, E.qrnn.Imp,
                       labels = "AUTO", ncol=4,nrow = 3, align = "v")
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Importance_Result.jpg",plot=Result.I,width = 12, height = 6, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/Importance_Result.jpg",plot=Result.I,width = 12, height = 6, dpi = 300)
 
 
 Result.p <- ggarrange(COD.df.p,TSS.df.p, E.coli.df.p,
                       labels = "AUTO", ncol=3, nrow = 1, align = "hv",  common.legend = F)
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/newFig5.jpg",plot=Result.p,width = 12*1.5, height = 2.7*1.5, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/newFig5.jpg",plot=Result.p,width = 12*1.5, height = 2.7*1.5, dpi = 300)
 
 Result2.p <- ggarrange(Csr.p,Tsr.p, Esr.p,
                        labels = "AUTO", ncol=3, nrow = 1, align = "hv",  common.legend = F)
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/newFig5sd.tiff",plot=Result2.p,width = 12*1.5, height = 2.7*1.5, dpi = 600)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/newFig5sd.tiff",plot=Result2.p,width = 12*1.5, height = 2.7*1.5, dpi = 300)
 
 
 #### E.coli Classification ####
@@ -1445,5 +1445,149 @@ E2plot
 
 
 #### COD Result by Sample point ####
+summarize_data <- function(df) {
+  df %>% 
+    filter(dataset == "Test") %>% 
+    group_by(ML) %>%
+    summarise(RMSE = caret::RMSE(predicted, actual),
+              R2 = caret::R2(predicted, actual),
+              MAPE = MAPE(predicted, actual)) %>%
+    ungroup() %>%
+    mutate(label = glue("**{ML}**: RMSE = {round(RMSE, 0)}; R<sup>2</sup> = {round(R2, 2)}"))
+}
+
+C1 <- subset(COD.df, Sample %in% c("Influent"))
+C2 <- subset(COD.df, Sample %in% c("AnMBR"))
+C3 <- subset(COD.df, Sample %in% c("Permeate"))
+C4 <- subset(COD.df, Sample %in% c("Post-NCS"))
+C5 <- subset(COD.df, Sample %in% c("Effluent"))
+
+C1_L <- summarize_data(C1)
+C2_L <- summarize_data(C2)
+C3_L <- summarize_data(C3)
+C4_L <- summarize_data(C4)
+C5_L <- summarize_data(C5)
+
+Cx.theme <- function(titl.,Ld.,x.,y.,...){
+  list(geom_point(aes(fill=dataset),size=1.5,color="black", stroke = 0.4,alpha = 0.8,shape=21),
+    geom_abline(color = "black", linetype = 2, size = .5, alpha = 0.5),theme_bw(),
+    scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "left",override.aes = list(shape=21,size=2.5), order = 1)),
+    theme(text = element_text(size=8),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(.5, .5)),
+    labs(x = "Predicted COD (mg/L)", y = "Measurde COD (mg/L)",title = titl.),
+    ...)
+}  #unit(c(T, R, B, L)
+
+C1p <- ggplot(C1, aes(predicted, actual)) + Cx.theme("Influent",C1_L, 0, c(10^seq(3.9,3.4,length=6)))+facet_wrap(~ ML, ncol = 1)+
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^2.9,10^3.8),labels=scales::trans_format("log10", scales::math_format (10^.x)))+
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^2.9,10^4),labels=scales::trans_format("log10", scales::math_format (10^.x)))
+
+C2p <- ggplot(C2, aes(predicted, actual)) + Cx.theme("AnMBR", C2_L,0, c(10^seq(3.7,3.3,length=6)))+facet_wrap(~ ML, ncol = 1)+
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^2.9,10^3.8),labels=scales::trans_format("log10", scales::math_format (10^.x)))+
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^2.9,10^3.8),labels=scales::trans_format("log10", scales::math_format (10^.x)))
+C3p <- ggplot(C3, aes(predicted, actual)) + Cx.theme("Permeate",C3_L,0, c(seq(1000,550,length=6)))+facet_wrap(~ ML, ncol = 1)+ylim(0,1100)+xlim(0,1100)
+C4p <- ggplot(C4, aes(predicted, actual)) + Cx.theme("Post-NCS",C4_L,-100, c(seq(450,225,length=6)))+facet_wrap(~ ML, ncol = 1)+ylim(NA,500)+xlim(NA,500)
+C5p <- ggplot(C5, aes(predicted, actual)) + Cx.theme("Effluent",C5_L,80, c(seq(0,-230,length=6)))+facet_wrap(~ ML, ncol = 1)+ylim(0,300)+xlim(0,300)
+
+get_legend<-function(a.gplot){
+  tmp <- ggplot_gtable(ggplot_build(a.gplot))
+  leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+  legend <- tmp$grobs[[leg]]
+  return(legend)}
+
+Cxp_legend <- get_legend(C5p+theme(legend.position="bottom", legend.direction="vertical"))
+
+Cxp <- ggarrange(C1p + theme(legend.position="bottom", legend.box="horizontal") + guides(fill="none", color = "none"),
+                 C2p + theme(legend.position="none") + labs(y = element_blank()),
+                 C3p + theme(legend.position="none") + labs(y = element_blank()),
+                 C4p + theme(legend.position="none") + labs(y = element_blank()),
+                 C5p + theme(legend.position="none") + labs(y = element_blank()),
+                 ncol=5,nrow = 1, align = "v", common.legend = T, legend = "bottom")
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS4.tiff",plot=Cxp,width = 6*1.5, height = 4*1.5, dpi = 150)
+
+
+#### TSS Result by Sample point ####
+T1 <- subset(TSS.df, Sample %in% c("Influent"))
+T2 <- subset(TSS.df, Sample %in% c("AnMBR"))
+T3 <- subset(TSS.df, Sample %in% c("Permeate"))
+T4 <- subset(TSS.df, Sample %in% c("Post-NCS"))
+T5 <- subset(TSS.df, Sample %in% c("Effluent"))
+
+T1_L <- summarize_data(T1)
+T2_L <- summarize_data(T2)
+T3_L <- summarize_data(T3)
+T4_L <- summarize_data(T4)
+T5_L <- summarize_data(T5)
+
+Tx.theme <- function(titl.,Ld.,x.,y.,...){
+  list(geom_point(aes(fill=dataset),size=1.5,color="black", stroke = 0.4,alpha = 0.8,shape=21),
+    geom_abline(color = "black", linetype = 2, size = .5, alpha = 0.5),theme_bw(),
+    scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "left",override.aes = list(shape=21,size=2.5), order = 1)),
+    theme(text = element_text(size=8),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(.5, .5)),
+    labs(x = "Predicted TSS (mg/L)", y = "Measurde TSS (mg/L)",title = titl.),
+    ...)
+} 
+
+T1p <- ggplot(T1, aes(predicted, actual)) + Tx.theme("Influent",T1_L, 0, c(10^seq(3.4,2.7,length=6)))+facet_wrap(~ ML, ncol = 1)+
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^2,10^3.5),labels=scales::trans_format("log10", scales::math_format (10^.x)))+
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^2,10^3.5),labels=scales::trans_format("log10", scales::math_format (10^.x)))
+
+T2p <- ggplot(T2, aes(predicted, actual)) + Tx.theme("AnMBR", T2_L,0, c(10^seq(2.9,2.5,length=6)))+facet_wrap(~ ML, ncol = 1)+
+  scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^2,10^3.5),labels=scales::trans_format("log10", scales::math_format (10^.x)))+
+  scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(10^2,10^3.5),labels=scales::trans_format("log10", scales::math_format (10^.x)))
+
+T3p <- ggplot(T3, aes(predicted, actual)) + Tx.theme("Permeate",T3_L,0, c(seq(325,150,length=6)))+facet_wrap(~ ML, ncol = 1)+ylim(NA,200)+xlim(NA,200)
+T4p <- ggplot(T4, aes(predicted, actual)) + Tx.theme("Post-NCS",T4_L,-25, c(seq(90,25,length=6)))+facet_wrap(~ ML, ncol = 1)+ylim(-25,100)+xlim(-25,100)
+T5p <- ggplot(T5, aes(predicted, actual)) + Tx.theme("Effluent",T5_L,-200, c(seq(140,45,length=6)))+facet_wrap(~ ML, ncol = 1)+ylim(-25,100)+xlim(-25,100)
+
+Txp <- ggarrange(T1p + theme(legend.position="bottom", legend.box="horizontal") + guides(fill="none", color = "none"),
+                 T2p + theme(legend.position="none") + labs(y = element_blank()),
+                 T3p + theme(legend.position="none") + labs(y = element_blank()),
+                 T4p + theme(legend.position="none") + labs(y = element_blank()),
+                 T5p + theme(legend.position="none") + labs(y = element_blank()),
+                 ncol=5,nrow = 1, align = "v", common.legend = T, legend = "bottom")
+ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS5.tiff",plot=Txp,width = 6*1.5, height = 4*1.5, dpi = 150)
+
+
+#### E.coli Result by Sample point ####
+E1 <- subset(E.coli.df, Sample %in% c("Influent"))
+E2 <- subset(E.coli.df, Sample %in% c("AnMBR"))
+E3 <- subset(E.coli.df, Sample %in% c("Permeate"))
+E4 <- subset(E.coli.df, Sample %in% c("Post-NCS"))
+E5 <- subset(E.coli.df, Sample %in% c("Effluent"))
+
+E1_L <- summarize_data(E1)
+E2_L <- summarize_data(E2)
+E3_L <- summarize_data(E3)
+E4_L <- summarize_data(E4)
+E5_L <- summarize_data(E5)
+
+Ex.theme <- function(titl.,Ld.,x.,y.,...){
+  list(#stat_ellipse(aes(color=ML, group=ML, fill=ML),geom = "polygon", alpha = 0.2, level = 0.5, type = "t", linetype = 0),
+    geom_point(aes(fill=dataset),size=1.5,color="black", stroke = 0.4,alpha = 0.8,shape=21),
+    geom_abline(color = "black", linetype = 2, size = .5, alpha = 0.5),theme_bw(),
+    scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "left",override.aes = list(shape=21,size=2.5), order = 1)),
+    theme(text = element_text(size=8),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(.5, .5)),scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(1,10^9),
+                                                                                                                                                             labels = scales::trans_format("log10", scales::math_format (10^.x))),
+    scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),limits=c(1,10^9),
+                  labels = scales::trans_format("log10", scales::math_format (10^.x))),
+    theme(text = element_text(size=8),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(.5, .5)),
+    labs(x = "Predicted E.coli (MPN/100ml)", y = "Measured E.coli (MPN/100ml)",title = titl.),
+    ...)
+}  
+E1p <- ggplot(E1, aes(predicted, actual)) + Ex.theme("Influent",E1_L, 0, c(10^(seq(8,4,length=6))))+facet_wrap(~ ML, ncol = 1)
+E2p <- ggplot(E2, aes(predicted, actual)) + Ex.theme("AnMBR", E2_L,0, c(10^(seq(8,4,length=6))))+facet_wrap(~ ML, ncol = 1)
+E3p <- ggplot(E3, aes(predicted, actual)) + Ex.theme("Permeate",E3_L,0, c(10^(seq(8,4,length=6))))+facet_wrap(~ ML, ncol = 1)
+E4p <- ggplot(E4, aes(predicted, actual)) + Ex.theme("Post-NCS",E4_L,0, c(10^(seq(8,4,length=6))))+facet_wrap(~ ML, ncol = 1)
+E5p <- ggplot(E5, aes(predicted, actual)) + Ex.theme("Effluent",E5_L,0, c(10^(seq(8,4,length=6))))+facet_wrap(~ ML, ncol = 1)
+
+Exp <- ggarrange(E1p + theme(legend.position="bottom", legend.box="horizontal") + guides(fill="none", color = "none"),
+                 E2p + theme(legend.position="none") + labs(y = element_blank()),
+                 E3p + theme(legend.position="none") + labs(y = element_blank()),
+                 E4p + theme(legend.position="none") + labs(y = element_blank()),
+                 E5p + theme(legend.position="none") + labs(y = element_blank()),
+                 ncol=5,nrow = 1, align = "v", common.legend = T, legend = "bottom")
+
+ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS6.tiff",plot=Exp,width = 6*1.5, height = 4*1.5, dpi = 150)
+
 
 
