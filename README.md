@@ -25,7 +25,7 @@ Developing advanced onsite wastewater treatment systems (OWTS) requires accurate
 
 The dataset used in this project is available upon request due to privacy or confidentiality considerations. If you are interested in accessing the data for research or educational purposes, please follow these steps:
 
-1. Send an email to [dhyeh@usf.edu] with the subject line "Data Request for MLsensor."
+1. Send an email to Dr. Daniel Yeh (dhyeh@usf.edu) with the subject line "Data Request for MLsensor."
 2. In your email, please include your affiliation, the purpose of your data request, and how you plan to use the data.
 3. We will review your request and respond with further instructions on how to access the data.
 
