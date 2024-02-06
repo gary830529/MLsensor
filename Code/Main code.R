@@ -1606,7 +1606,7 @@ Txp <- ggarrange(T1p + theme(legend.position="bottom", legend.box="horizontal") 
                  T4p + theme(legend.position="none") + labs(y = element_blank()),
                  T5p + theme(legend.position="none") + labs(y = element_blank()),
                  ncol=5,nrow = 1, align = "v", common.legend = T, legend = "bottom")
-ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS5.tiff",plot=Txp,width = 6*1.5, height = 4*1.5, dpi = 150)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS5.tiff",plot=Txp,width = 6*1.5, height = 4*1.5, dpi = 150)
 
 
 #### E.coli Result by Sample point ####
