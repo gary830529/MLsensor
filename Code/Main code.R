@@ -1648,7 +1648,7 @@ Exp <- ggarrange(E1p + theme(legend.position="bottom", legend.box="horizontal") 
                  E5p + theme(legend.position="none") + labs(y = element_blank()),
                  ncol=5,nrow = 1, align = "v", common.legend = T, legend = "bottom")
 
-ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS6.tiff",plot=Exp,width = 6*1.5, height = 4*1.5, dpi = 150)
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/FigureS6.tiff",plot=Exp,width = 6*1.5, height = 4*1.5, dpi = 150)
 
 
 
