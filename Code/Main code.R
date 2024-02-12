@@ -4,6 +4,7 @@ pacman::p_load(plyr,dplyr,reshape2,stringr,lubridate,readxl,openxlsx,janitor,ggp
                glue,ggtext,png,gtools,ggrepel,rvg,gdata,scales,nnet,xgboost,correlation,psych,corrgram,jpeg,qrnn,pls,kernlab)
 colx <- colorRampPalette(c("#16068a","#9e189d","#fdb32e"))
 colx2 <- colorRampPalette(c("#264653","#2a9d8e","#e9c46b","#f3a261","#e66f51"))
+setwd("G:/My Drive/R project")
 
 #### Start ####
 Raw <- read.csv(file = 'G:/My Drive/R project/GitHub/MLsensor/Raw_data/Data_ML.csv',header = T, sep = ",")

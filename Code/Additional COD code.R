@@ -4,6 +4,7 @@ pacman::p_load(plyr,dplyr,reshape2,stringr,lubridate,readxl,openxlsx,janitor,ggp
                glue,ggtext,png,gtools,ggrepel,rvg,gdata,scales,nnet,xgboost,correlation,psych,corrgram,jpeg,qrnn,pls,kernlab)
 colx <- colorRampPalette(c("#16068a","#9e189d","#fdb32e"))
 colx2 <- colorRampPalette(c("#264653","#2a9d8e","#e9c46b","#f3a261","#e66f51"))
+setwd("G:/My Drive/R project")
 
 #### Start ####
 Raw <- read.csv(file = 'G:/My Drive/R project/GitHub/MLsensor/Raw_data/Data_ML.csv',header = T, sep = ",")
@@ -32,6 +33,14 @@ Raw$pCOD <- ifelse(Raw$COD - Raw$sCOD <= 0, 0, Raw$COD - Raw$sCOD)
 Raw <- Raw[c("Group","Date","COD", "sCOD","pCOD","TSS","E.coli","Color","Turb","EC","pH","NH4","NO3","Temp","Event","BP","VSS")]
 WQ <- Raw
 
+
+#### Mean Absolute Percentage Error #### 
+MAPE <- function(pred.,actu.,...){
+  mean(abs((ifelse(actu. == 0, (actu.+pred.)/2, actu.)-pred.)/ifelse(actu. > pred., ifelse(actu. == 0, (actu.+pred.)/2, actu.),pred.) ))*100
+  #    ifelse(abs((actu.-pred.)/actu.)>1,NA,abs((actu.-pred.)/actu.)), na.rm=TRUE) * 100
+}
+
+
 Dates_after_events2 <- as.Date(c("2019-01-15", "2019-01-22"))
 WQ2 <- WQ %>% filter(Date %nin% Dates_after_events2)
 WQ2 <- WQ2[complete.cases(WQ2), ]
@@ -46,16 +55,54 @@ WQ2.test <- WQ2[-WQ2.index,]
 
 
 #### Correlation for COD PCOD SCOD ####
+upper_fn <- function(data, mapping, method="pearson", use="pairwise", ...){
+  x <- eval_data_col(data, mapping$x)
+  y <- eval_data_col(data, mapping$y)
+  corr <- cor(x, y, method=method, use=use)
+  colFn <- colorRampPalette(c("#4477AA", "#ffffff", "#BB4444"), interpolate ='spline')
+  fill <- colFn(100)[findInterval(corr, seq(-1, 1, length=100))]
+  ggally_cor(data = data, mapping = mapping, size = 2, color = '#050505', stars = T, ...) + 
+    theme_void() +
+    theme(panel.background = element_rect(fill=fill))
+}
+
+diag_fn <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_density(alpha=.2,...)+theme_bw()
+}
+
+lower_fn <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_point(color = '#050505', alpha=0.3, size=0.5) +
+    geom_smooth(color = '#ff8a8a', method='lm', size=0.5,se=F,...)+theme_bw()
+}
+
 WQ2.cor <- WQ2 %>% within(Group <- factor(Group, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-colnames(WQ2.cor) <- c("Group", "COD", "sCOD","pCOD","TSS","E.coli","Color","Trubidity","EC","pH","NH4","NO3","Temperature","E.coli2") 
+colnames(WQ2.cor) <- c("Group", "COD", "sCOD","pCOD","TSS","E.coli","Color","Trubidity","EC","pH","NH4","NO3","Temperature") 
 
 
-WQ2.Cor <- ggpairs(subset(WQ2.cor, select = -c(Group,E.coli2)), 
+WQ2.Cor <- ggpairs(subset(WQ2.cor, select = -c(Group,TSS,E.coli)), 
                    upper = list(continuous = upper_fn), lower = list(continuous = lower_fn), diag = list(continuous = diag_fn))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size=5), axis.text.y = element_text(size=5),text = element_text(size=6))
 WQ2.Cor
 
 #### Correlation between COD PCOD SCOD ####
+upper_fn2 <- function(data, mapping, method="pearson", use="pairwise", ...){
+  ggally_cor(data = data, mapping = mapping, size = 2.3, fontface = "bold", ...) + 
+    theme_void()
+}
+
+diag_fn <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_density(alpha=.2,...)+theme_bw()
+}
+
+lower_fn2 <- function(data, mapping, ...) {
+  ggplot(data = data, mapping = mapping) +
+    geom_point(alpha=0.3, size=0.9) +
+    geom_smooth(method='lm', size=0.5, se = FALSE,...)+theme_bw()
+}
+
 WQ2.COD.cor <- ggpairs(WQ2.cor[1:4],aes(colour = Group, alpha = 0.4), title="COD Correlations",
                       upper = list(continuous = upper_fn2), lower = list(continuous = lower_fn2), diag = list(continuous = diag_fn))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size=5), axis.text.y = element_text(size=5),panel.grid.major = element_blank())+
@@ -98,32 +145,33 @@ sC.knn.Imp <- ggplot(varImp(WQ.sC.knn, scale = T))+theme_bw()+labs(x=element_bla
 sC.svm.Imp <- ggplot(varImp(WQ.sC.svm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "SCOD-SVR")
 sC.cub.Imp <- ggplot(varImp(WQ.sC.cub, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "SCOD-CUB")
 sC.qrnn.Imp <- ggplot(varImp(WQ.sC.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "SCOD-QRNN")
-sC.varImp <- ggarrange(sC.pls.Imp, sC.svm.Imp, sC.cub.Imp,sC.qrnn.Imp, ncol=2, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
+sC.varImp <- ggarrange(sC.lm.Imp,sC.pls.Imp, sC.svm.Imp,sC.rf.Imp, sC.cub.Imp,sC.qrnn.Imp, ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
 sC.varImp
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/SC_varImp.jpg",plot=sC.varImp,width = 6, height = 4, dpi = 300)
 
 ### sCOD Train RMSE Boxplot ### 
-sC.results <- resamples(list("qrnn" = WQ.sC.qrnn, "knn" = WQ.sC.knn, "svr" = WQ.sC.svm,"pls" = WQ.sC.pls, "rf" = WQ.sC.rf, "CUB" = WQ.sC.cub))
-sC.RMSE <- data.frame(sC.results$values$`qrnn~RMSE`,sC.results$values$`knn~RMSE`,sC.results$values$`svr~RMSE`,
+sC.results <- resamples(list("LM" = WQ.sC.lm, "qrnn" = WQ.sC.qrnn, "knn" = WQ.sC.knn, "svr" = WQ.sC.svm,"pls" = WQ.sC.pls, "rf" = WQ.sC.rf, "CUB" = WQ.sC.cub))
+sC.RMSE <- data.frame(sC.results$values$`LM~RMSE`,sC.results$values$`qrnn~RMSE`,sC.results$values$`knn~RMSE`,sC.results$values$`svr~RMSE`,
                      sC.results$values$`pls~RMSE`,sC.results$values$`rf~RMSE`,sC.results$values$`CUB~RMSE`)
-colnames(sC.RMSE) <- c("QRNN","KNN","SVR","PLS","RF","CUB")
-sC.RMSE <- sC.RMSE %>% gather(key = "Model", value = "RMSE", QRNN, KNN, SVR, PLS, RF, CUB) %>% convert_as_factor(Model)
+colnames(sC.RMSE) <- c("LM","QRNN","KNN","SVR","PLS","RF","CUB")
+sC.RMSE <- sC.RMSE %>% gather(key = "Model", value = "RMSE", LM, QRNN, KNN, SVR, PLS, RF, CUB) %>% convert_as_factor(Model)
 sC.Ttest <- sC.RMSE %>% pairwise_t_test(RMSE ~ Model, paired = TRUE, alt = c("two.sided"), conf.level = 0.99, p.adjust.method = "bonferroni") %>% add_xy_position(x = "Model")
-sC.RMSE.p <- ggboxplot(sC.RMSE, x = "Model", y = "RMSE",color = "black", legend = "none", order = c("PLS","KNN","SVR","RF","QRNN","CUB"),outlier.shape = NA) +
+sC.RMSE.p <- ggboxplot(sC.RMSE, x = "Model", y = "RMSE",color = "black", legend = "none", order = c("LM","PLS","KNN","SVR","RF","QRNN","CUB"),outlier.shape = NA) +
   geom_point(data = sC.RMSE, aes(x = Model, y = RMSE, colour = Model, alpha = 0.9), position = position_jitter(width = 0.2))+
   geom_hline(yintercept = mean(sC.RMSE$RMSE), linetype = 2) + 
   coord_flex_cart(bottom=brackets_horizontal(), left=capped_vertical('none'))+
   theme_bw()+labs(x = element_blank(), y = "RMSE (SCOD mg/L)")+
   theme(text = element_text(size=15),legend.title=element_blank(),legend.position = "none",
         panel.border=element_blank(), axis.line = element_line(),legend.background = element_rect(colour='grey')) +
-  scale_color_manual(values = c("PLS"=colx(6)[1],"KNN"=colx(6)[2],"SVR"=colx(6)[3],"RF"=colx(6)[4],"QRNN"=colx(6)[5],"CUB"=colx(6)[6]),guide=guide_legend(title = "Algorithms", order = 1))
+  scale_color_manual(values = c("LM"=colx(7)[1],"PLS"=colx(7)[2],"KNN"=colx(7)[3],"SVR"=colx(7)[4],"RF"=colx(7)[5],"QRNN"=colx(7)[6],"CUB"=colx(7)[7]),guide=guide_legend(title = "Algorithms", order = 1))
 sC.RMSE.p
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/SC_RMSE.jpg",plot=sC.RMSE.p,width = 6, height = 4, dpi = 300)
 
 ### SCOD Test RMSE Boxplot ### 
 scod.theme <- function(titl.,lab.data,...){
-  list(geom_point(aes(fill=dataset), size=5.25, shape=21, color="black", stroke=0.5, alpha=0.75),
+  list(geom_point(aes(fill=dataset), size=3.25, shape=21, color="black", stroke=0.5, alpha=0.75),
        theme_bw(),ylim(0,6000),xlim(0,6000),
-       scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "left",override.aes = list(shape=21,size=2.5), order = 1, nrow = 1)),
+       scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "top",override.aes = list(shape=21,size=2.5), order = 1, nrow = 2)),
        theme(text = element_text(size=8.5),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(0.15, 0.85)),
        labs(x = "Estimated SCOD (mg/L)", y = "Measured SCOD (mg/L)",title = titl.),geom_abline(color = "black", linetype = 2, size = 1, alpha = 0.5),
        geom_richtext(data = lab.data,aes(3400, 1000, label = label[1]),hjust = 0,size = 2.75,fill = "white", label.color = "black"),
@@ -144,7 +192,7 @@ sC.lm.L <- sC.lm.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 sC.lm.L$label[1] <- paste("Train RMSE =", round(sC.lm.L$RMSE[2], 0), "<br> Test RMSE =", round(sC.lm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(sC.lm.L$R2[1], 2), "<br> MAPE =", round(sC.lm.L$MAPE[1], 1))
-sC.lm.p <- ggplot(sC.lm.df, aes(predicted, actual))+scod.theme(NULL,sC.lm.L)+theme(legend.position="none")
+sC.lm.p <- ggplot(sC.lm.df, aes(predicted, actual))+scod.theme("SCOD-LM",sC.lm.L)+theme(legend.position="none")
 sC.lm.p
 
 ### QRNN ###
@@ -161,7 +209,7 @@ sC.qrnn.L <- sC.qrnn.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 sC.qrnn.L$label[1] <- paste("Train RMSE =", round(sC.qrnn.L$RMSE[2], 0), "<br> Test RMSE =", round(sC.qrnn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(sC.qrnn.L$R2[1], 2), "<br> MAPE =", round(sC.qrnn.L$MAPE[1], 1))
-sC.qrnn.p <- ggplot(sC.qrnn.df, aes(predicted, actual))+scod.theme(NULL,sC.qrnn.L)+theme(legend.position="none")
+sC.qrnn.p <- ggplot(sC.qrnn.df, aes(predicted, actual))+scod.theme("SCOD-QRNN",sC.qrnn.L)+theme(legend.position="none")
 sC.qrnn.p
 
 ### PLS ###
@@ -178,7 +226,7 @@ sC.pls.L <- sC.pls.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 sC.pls.L$label[1] <- paste("Train RMSE =", round(sC.pls.L$RMSE[2], 0), "<br> Test RMSE =", round(sC.pls.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(sC.pls.L$R2[1], 2), "<br> MAPE =", round(sC.pls.L$MAPE[1], 1))
-sC.pls.p <- ggplot(sC.pls.df, aes(predicted, actual))+scod.theme(NULL,sC.pls.L)
+sC.pls.p <- ggplot(sC.pls.df, aes(predicted, actual))+scod.theme("SCOD-PLS",sC.pls.L)
 sC.pls.p
 
 ### KNN ###
@@ -195,7 +243,7 @@ sC.knn.L <- sC.knn.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 sC.knn.L$label[1] <- paste("Train RMSE =", round(sC.knn.L$RMSE[2], 0), "<br> Test RMSE =", round(sC.knn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(sC.knn.L$R2[1], 2), "<br> MAPE =", round(sC.knn.L$MAPE[1], 1))
-sC.knn.p <- ggplot(sC.knn.df, aes(predicted, actual))+scod.theme(NULL,sC.knn.L)+theme(legend.position="none")
+sC.knn.p <- ggplot(sC.knn.df, aes(predicted, actual))+scod.theme("SCOD-KNN",sC.knn.L)+theme(legend.position="none")
 sC.knn.p
 
 ### SVM ###
@@ -212,7 +260,7 @@ sC.svm.L <- sC.svm.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 sC.svm.L$label[1] <- paste("Train RMSE =", round(sC.svm.L$RMSE[2], 0), "<br> Test RMSE =", round(sC.svm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(sC.svm.L$R2[1], 2), "<br> MAPE =", round(sC.svm.L$MAPE[1], 1))
-sC.svm.p <- ggplot(sC.svm.df, aes(predicted, actual))+scod.theme(NULL,sC.svm.L)+theme(legend.position="none")
+sC.svm.p <- ggplot(sC.svm.df, aes(predicted, actual))+scod.theme("SCOD-SVR",sC.svm.L)+theme(legend.position="none")
 sC.svm.p
 
 ### RF ###
@@ -229,7 +277,7 @@ sC.rf.L <- sC.rf.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 sC.rf.L$label[1] <- paste("Train RMSE =", round(sC.rf.L$RMSE[2], 0), "<br> Test RMSE =", round(sC.rf.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(sC.rf.L$R2[1], 2), "<br> MAPE =", round(sC.rf.L$MAPE[1], 1))
-sC.rf.p <- ggplot(sC.rf.df, aes(predicted, actual))+scod.theme(NULL,sC.rf.L)+theme(legend.position="none")
+sC.rf.p <- ggplot(sC.rf.df, aes(predicted, actual))+scod.theme("SCOD-RF",sC.rf.L)+theme(legend.position="none")
 sC.rf.p
 
 ### CUB ###
@@ -246,12 +294,17 @@ sC.cub.L <- sC.cub.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 sC.cub.L$label[1] <- paste("Train RMSE =", round(sC.cub.L$RMSE[2], 0), "<br> Test RMSE =", round(sC.cub.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(sC.cub.L$R2[1], 2), "<br> MAPE =", round(sC.cub.L$MAPE[1], 1))
-sC.cub.p <- ggplot(sC.cub.df, aes(predicted, actual))+scod.theme(NULL,sC.cub.L)+theme(legend.position="none")
+sC.cub.p <- ggplot(sC.cub.df, aes(predicted, actual))+scod.theme("SCOD-CUB",sC.cub.L)+theme(legend.position="none")
 sC.cub.p
 
 ### Save SCOD Result Scatter Plot ###
-sCOD.R.p <- ggarrange(sC.pls.p,sC.svm.p,sC.cub.p,sC.qrnn.p,labels = "AUTO", ncol=4,nrow = 1, align = "v")
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/SCOD_ScatterP.jpg",plot=sCOD.R.p,width = 12, height = 2, dpi = 300)
+leg <- get_legend(sC.pls.p)
+
+sCOD.R.p <- ggarrange(sC.lm.p,sC.pls.p+theme(legend.position="none"),sC.knn.p,sC.svm.p,
+                      sC.rf.p,sC.cub.p,sC.qrnn.p,as_ggplot(leg),
+                      labels = c("A","B","C","D","E","F","G",""), ncol=4,nrow = 2, align = "v")
+sCOD.R.p
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/SCOD_ScatterP.jpg",plot=sCOD.R.p,width = 12, height = 6, dpi = 300)
 
 ### SCOD Overall Scatter Plot ###
 SCOD.df <- rbind(sC.qrnn.df,sC.pls.df,sC.svm.df,sC.cub.df)
@@ -347,30 +400,31 @@ pC.knn.Imp <- ggplot(varImp(WQ.pC.knn, scale = T))+theme_bw()+labs(x=element_bla
 pC.svm.Imp <- ggplot(varImp(WQ.pC.svm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "PCOD-SVR")
 pC.cub.Imp <- ggplot(varImp(WQ.pC.cub, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "PCOD-CUB")
 pC.qrnn.Imp <- ggplot(varImp(WQ.pC.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "PCOD-QRNN")
-pC.varImp <- ggarrange(pC.pls.Imp, pC.svm.Imp, pC.cub.Imp,pC.qrnn.Imp, ncol=2, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
+pC.varImp <- ggarrange(pC.lm.Imp,pC.pls.Imp, pC.svm.Imp, pC.rf.Imp, pC.cub.Imp,pC.qrnn.Imp, ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
 pC.varImp
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/PC_varImp.jpg",plot=pC.varImp,width = 6, height = 4, dpi = 300)
 
 ### pCOD Train RMSE Boxplot ### 
-pC.results <- resamples(list("qrnn" = WQ.pC.qrnn, "knn" = WQ.pC.knn, "svr" = WQ.pC.svm,"pls" = WQ.pC.pls, "rf" = WQ.pC.rf, "CUB" = WQ.pC.cub))
-pC.RMSE <- data.frame(pC.results$values$`qrnn~RMSE`,pC.results$values$`knn~RMSE`,pC.results$values$`svr~RMSE`,
+pC.results <- resamples(list("lm" = WQ.pC.lm,"qrnn" = WQ.pC.qrnn, "knn" = WQ.pC.knn, "svr" = WQ.pC.svm,"pls" = WQ.pC.pls, "rf" = WQ.pC.rf, "CUB" = WQ.pC.cub))
+pC.RMSE <- data.frame(pC.results$values$`lm~RMSE`,pC.results$values$`qrnn~RMSE`,pC.results$values$`knn~RMSE`,pC.results$values$`svr~RMSE`,
                       pC.results$values$`pls~RMSE`,pC.results$values$`rf~RMSE`,pC.results$values$`CUB~RMSE`)
-colnames(pC.RMSE) <- c("QRNN","KNN","SVR","PLS","RF","CUB")
-pC.RMSE <- pC.RMSE %>% gather(key = "Model", value = "RMSE", QRNN, KNN, SVR, PLS, RF, CUB) %>% convert_as_factor(Model)
+colnames(pC.RMSE) <- c("LM","QRNN","KNN","SVR","PLS","RF","CUB")
+pC.RMSE <- pC.RMSE %>% gather(key = "Model", value = "RMSE", LM, QRNN, KNN, SVR, PLS, RF, CUB) %>% convert_as_factor(Model)
 pC.Ttest <- pC.RMSE %>% pairwise_t_test(RMSE ~ Model, paired = TRUE, alt = c("two.sided"), conf.level = 0.99, p.adjust.method = "bonferroni") %>% add_xy_position(x = "Model")
-pC.RMSE.p <- ggboxplot(pC.RMSE, x = "Model", y = "RMSE",color = "black", legend = "none", order = c("PLS","KNN","SVR","RF","QRNN","CUB"),outlier.shape = NA) +
+pC.RMSE.p <- ggboxplot(pC.RMSE, x = "Model", y = "RMSE",color = "black", legend = "none", order = c("LM","PLS","KNN","SVR","RF","QRNN","CUB"),outlier.shape = NA) +
   geom_point(data = pC.RMSE, aes(x = Model, y = RMSE, colour = Model, alpha = 0.9), position = position_jitter(width = 0.2))+
   geom_hline(yintercept = mean(pC.RMSE$RMSE), linetype = 2) + 
   coord_flex_cart(bottom=brackets_horizontal(), left=capped_vertical('none'))+
   theme_bw()+labs(x = element_blank(), y = "RMSE (PCOD mg/L)")+
   theme(text = element_text(size=15),legend.title=element_blank(),legend.position = "none",
         panel.border=element_blank(), axis.line = element_line(),legend.background = element_rect(colour='grey')) +
-  scale_color_manual(values = c("PLS"=colx(6)[1],"KNN"=colx(6)[2],"SVR"=colx(6)[3],"RF"=colx(6)[4],"QRNN"=colx(6)[5],"CUB"=colx(6)[6]),guide=guide_legend(title = "Algorithms", order = 1))
+  scale_color_manual(values = c("LM"=colx(7)[1],"PLS"=colx(7)[2],"KNN"=colx(7)[3],"SVR"=colx(7)[4],"RF"=colx(7)[5],"QRNN"=colx(7)[6],"CUB"=colx(7)[7]),guide=guide_legend(title = "Algorithms", order = 1))
 pC.RMSE.p
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/PC_RMSE.jpg",plot=pC.RMSE.p,width = 6, height = 4, dpi = 300)
 
 ### PCOD Test RMSE Boxplot ### 
 pcod.theme <- function(titl.,lab.data,...){
-  list(geom_point(aes(fill=dataset), size=5.25, shape=21, color="black", stroke=0.5, alpha=0.75),
+  list(geom_point(aes(fill=dataset), size=3.25, shape=21, color="black", stroke=0.5, alpha=0.75),
        theme_bw(),ylim(0,3000),xlim(0,3000),
        scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "left",override.aes = list(shape=21,size=2.5), order = 1, nrow = 1)),
        theme(text = element_text(size=8.5),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(0.15, 0.85)),
@@ -393,7 +447,7 @@ pC.lm.L <- pC.lm.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 pC.lm.L$label[1] <- paste("Train RMSE =", round(pC.lm.L$RMSE[2], 0), "<br> Test RMSE =", round(pC.lm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(pC.lm.L$R2[1], 2), "<br> MAPE =", round(pC.lm.L$MAPE[1], 1))
-pC.lm.p <- ggplot(pC.lm.df, aes(predicted, actual))+pcod.theme(NULL,pC.lm.L)+theme(legend.position="none")
+pC.lm.p <- ggplot(pC.lm.df, aes(predicted, actual))+pcod.theme("PCOD-LM",pC.lm.L)+theme(legend.position="none")
 pC.lm.p
 
 ### QRNN ###
@@ -410,7 +464,7 @@ pC.qrnn.L <- pC.qrnn.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 pC.qrnn.L$label[1] <- paste("Train RMSE =", round(pC.qrnn.L$RMSE[2], 0), "<br> Test RMSE =", round(pC.qrnn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(pC.qrnn.L$R2[1], 2), "<br> MAPE =", round(pC.qrnn.L$MAPE[1], 1))
-pC.qrnn.p <- ggplot(pC.qrnn.df, aes(predicted, actual))+pcod.theme(NULL,pC.qrnn.L)+theme(legend.position="none")
+pC.qrnn.p <- ggplot(pC.qrnn.df, aes(predicted, actual))+pcod.theme("PCOD-QRNN",pC.qrnn.L)+theme(legend.position="none")
 pC.qrnn.p
 
 ### PLS ###
@@ -427,7 +481,7 @@ pC.pls.L <- pC.pls.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 pC.pls.L$label[1] <- paste("Train RMSE =", round(pC.pls.L$RMSE[2], 0), "<br> Test RMSE =", round(pC.pls.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(pC.pls.L$R2[1], 2), "<br> MAPE =", round(pC.pls.L$MAPE[1], 1))
-pC.pls.p <- ggplot(pC.pls.df, aes(predicted, actual))+pcod.theme(NULL,pC.pls.L)
+pC.pls.p <- ggplot(pC.pls.df, aes(predicted, actual))+pcod.theme("PCOD-PLS",pC.pls.L)
 pC.pls.p
 
 ### KNN ###
@@ -444,7 +498,7 @@ pC.knn.L <- pC.knn.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 pC.knn.L$label[1] <- paste("Train RMSE =", round(pC.knn.L$RMSE[2], 0), "<br> Test RMSE =", round(pC.knn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(pC.knn.L$R2[1], 2), "<br> MAPE =", round(pC.knn.L$MAPE[1], 1))
-pC.knn.p <- ggplot(pC.knn.df, aes(predicted, actual))+pcod.theme(NULL,pC.knn.L)+theme(legend.position="none")
+pC.knn.p <- ggplot(pC.knn.df, aes(predicted, actual))+pcod.theme("PCOD-KNN",pC.knn.L)+theme(legend.position="none")
 pC.knn.p
 
 ### SVM ###
@@ -461,7 +515,7 @@ pC.svm.L <- pC.svm.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 pC.svm.L$label[1] <- paste("Train RMSE =", round(pC.svm.L$RMSE[2], 0), "<br> Test RMSE =", round(pC.svm.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(pC.svm.L$R2[1], 2), "<br> MAPE =", round(pC.svm.L$MAPE[1], 1))
-pC.svm.p <- ggplot(pC.svm.df, aes(predicted, actual))+pcod.theme(NULL,pC.svm.L)+theme(legend.position="none")
+pC.svm.p <- ggplot(pC.svm.df, aes(predicted, actual))+pcod.theme("PCOD-SVR",pC.svm.L)+theme(legend.position="none")
 pC.svm.p
 
 ### RF ###
@@ -478,7 +532,7 @@ pC.rf.L <- pC.rf.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 pC.rf.L$label[1] <- paste("Train RMSE =", round(pC.rf.L$RMSE[2], 0), "<br> Test RMSE =", round(pC.rf.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(pC.rf.L$R2[1], 2), "<br> MAPE =", round(pC.rf.L$MAPE[1], 1))
-pC.rf.p <- ggplot(pC.rf.df, aes(predicted, actual))+pcod.theme(NULL,pC.rf.L)+theme(legend.position="none")
+pC.rf.p <- ggplot(pC.rf.df, aes(predicted, actual))+pcod.theme("PCOD-RF",pC.rf.L)+theme(legend.position="none")
 pC.rf.p
 
 ### CUB ###
@@ -495,12 +549,15 @@ pC.cub.L <- pC.cub.df %>% group_by(dataset) %>%
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
 pC.cub.L$label[1] <- paste("Train RMSE =", round(pC.cub.L$RMSE[2], 0), "<br> Test RMSE =", round(pC.cub.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(pC.cub.L$R2[1], 2), "<br> MAPE =", round(pC.cub.L$MAPE[1], 1))
-pC.cub.p <- ggplot(pC.cub.df, aes(predicted, actual))+pcod.theme(NULL,pC.cub.L)+theme(legend.position="none")
+pC.cub.p <- ggplot(pC.cub.df, aes(predicted, actual))+pcod.theme("PCOD-CUB",pC.cub.L)+theme(legend.position="none")
 pC.cub.p
 
 ### Save PCOD Result Scatter Plot ###
-pCOD.R.p <- ggarrange(pC.pls.p,pC.svm.p,pC.cub.p,pC.qrnn.p,labels = "AUTO", ncol=4,nrow = 1, align = "v")
-#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/PCOD_ScatterP.jpg",plot=pCOD.R.p,width = 12, height = 2, dpi = 300)
+pCOD.R.p <- ggarrange(pC.lm.p,pC.pls.p+theme(legend.position="none"),pC.knn.p,pC.svm.p,
+                      pC.rf.p,pC.cub.p,pC.qrnn.p,as_ggplot(leg),
+                      labels = c("A","B","C","D","E","F","G",""), ncol=4,nrow = 2, align = "v")
+pCOD.R.p
+#ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/PCOD_ScatterP.jpg",plot=pCOD.R.p,width = 12, height = 6, dpi = 300)
 
 ### PCOD Overall Scatter Plot ###
 PCOD.df <- rbind(pC.qrnn.df,pC.pls.df,pC.svm.df,pC.cub.df)
