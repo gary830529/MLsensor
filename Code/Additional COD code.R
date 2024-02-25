@@ -81,7 +81,7 @@ WQ2.cor <- WQ2 %>% within(Group <- factor(Group, labels = c("Influent","AnMBR","
 colnames(WQ2.cor) <- c("Group", "COD", "sCOD","pCOD","TSS","E.coli","Color","Trubidity","EC","pH","NH4","NO3","Temperature") 
 
 
-WQ2.Cor <- ggpairs(subset(WQ2.cor, select = -c(Group,TSS,E.coli)), 
+WQ2.Cor <- ggpairs(subset(WQ2.cor, select = -c(Group,E.coli)), 
                    upper = list(continuous = upper_fn), lower = list(continuous = lower_fn), diag = list(continuous = diag_fn))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size=5), axis.text.y = element_text(size=5),text = element_text(size=6))
 WQ2.Cor
@@ -104,7 +104,7 @@ lower_fn2 <- function(data, mapping, ...) {
     geom_smooth(method='lm', size=0.5, se = FALSE,...)+theme_bw()
 }
 
-WQ2.COD.cor <- ggpairs(WQ2.cor[1:4],aes(colour = Group, alpha = 0.4), title="COD Correlations",
+WQ2.COD.cor <- ggpairs(WQ2.cor[1:5],aes(colour = Group, alpha = 0.4), title="COD Correlations",
                       upper = list(continuous = upper_fn2), lower = list(continuous = lower_fn2), diag = list(continuous = diag_fn))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size=5), axis.text.y = element_text(size=5),panel.grid.major = element_blank())+
   scale_fill_manual(values = c(colx2(5)))+
