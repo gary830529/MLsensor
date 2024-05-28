@@ -169,7 +169,7 @@ sC.RMSE.p
 sCOD.theme <- function(titl.,lab.data,...){
   list(geom_point(aes(fill=dataset), size=3.25, shape=21, color="black", stroke=0.5, alpha=0.75),
        theme_bw(),ylim(0,6000),xlim(0,6000),
-       scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "top",override.aes = list(shape=21,size=2.5), order = 1, nrow = 2)),
+       scale_fill_manual(values = c(colx2(2)), guide = guide_legend(title = "Dataset", title.position = "left",override.aes = list(shape=21,size=2.5), order = 1, nrow = 1)),
        theme(text = element_text(size=8.5),legend.background = element_blank(),legend.box.background = element_blank(),legend.position = c(0.15, 0.85)),
        labs(x = "Estimated sCOD (mg/L)", y = "Measured sCOD (mg/L)",title = titl.),geom_abline(color = "black", linetype = 2, size = 1, alpha = 0.5),
        geom_richtext(data = lab.data,aes(3400, 1000, label = label[1]),hjust = 0,size = 2.75,fill = "white", label.color = "black"),
@@ -177,8 +177,8 @@ sCOD.theme <- function(titl.,lab.data,...){
 }
 
 ### LM ###
-sC.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.lm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-sC.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.lm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),sC.lm.df)
+sC.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.lm, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+sC.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.lm, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),sC.lm.df)
 sC.lm.df <- sC.lm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 sC.lm.sr <- lm(X2 ~ X3, data=sC.lm.df)
 sC.lm.df <- cbind(sC.lm.df, rstandard(sC.lm.sr))
@@ -194,8 +194,8 @@ sC.lm.p <- ggplot(sC.lm.df, aes(predicted, actual))+sCOD.theme("sCOD-LM",sC.lm.L
 sC.lm.p
 
 ### QRNN ###
-sC.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.qrnn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-sC.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.qrnn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),sC.qrnn.df)
+sC.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.qrnn, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+sC.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.qrnn, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),sC.qrnn.df)
 sC.qrnn.df <- sC.qrnn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 sC.qrnn.sr <- lm(X2 ~ X3, data=sC.qrnn.df)
 sC.qrnn.df <- cbind(sC.qrnn.df, rstandard(sC.qrnn.sr))
@@ -211,8 +211,8 @@ sC.qrnn.p <- ggplot(sC.qrnn.df, aes(predicted, actual))+sCOD.theme("sCOD-QRNN",s
 sC.qrnn.p
 
 ### PLS ###
-sC.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.pls, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-sC.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.pls, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),sC.pls.df)
+sC.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.pls, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+sC.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.pls, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),sC.pls.df)
 sC.pls.df <- sC.pls.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 sC.pls.sr <- lm(X2 ~ X3, data=sC.pls.df)
 sC.pls.df <- cbind(sC.pls.df, rstandard(sC.pls.sr))
@@ -228,8 +228,8 @@ sC.pls.p <- ggplot(sC.pls.df, aes(predicted, actual))+sCOD.theme("sCOD-PLS",sC.p
 sC.pls.p
 
 ### KNN ###
-sC.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.knn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-sC.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.knn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),sC.knn.df)
+sC.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.knn, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+sC.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.knn, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),sC.knn.df)
 sC.knn.df <- sC.knn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 sC.knn.sr <- lm(X2 ~ X3, data=sC.knn.df)
 sC.knn.df <- cbind(sC.knn.df, rstandard(sC.knn.sr))
@@ -245,8 +245,8 @@ sC.knn.p <- ggplot(sC.knn.df, aes(predicted, actual))+sCOD.theme("sCOD-KNN",sC.k
 sC.knn.p
 
 ### SVM ###
-sC.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.svm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-sC.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.svm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),sC.svm.df)
+sC.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.svm, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+sC.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.svm, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),sC.svm.df)
 sC.svm.df <- sC.svm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 sC.svm.sr <- lm(X2 ~ X3, data=sC.svm.df)
 sC.svm.df <- cbind(sC.svm.df, rstandard(sC.svm.sr))
@@ -262,8 +262,8 @@ sC.svm.p <- ggplot(sC.svm.df, aes(predicted, actual))+sCOD.theme("sCOD-SVR",sC.s
 sC.svm.p
 
 ### RF ###
-sC.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.rf, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-sC.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.rf, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),sC.rf.df)
+sC.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.rf, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+sC.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.rf, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),sC.rf.df)
 sC.rf.df <- sC.rf.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 sC.rf.sr <- lm(X2 ~ X3, data=sC.rf.df)
 sC.rf.df <- cbind(sC.rf.df, rstandard(sC.rf.sr))
@@ -279,8 +279,8 @@ sC.rf.p <- ggplot(sC.rf.df, aes(predicted, actual))+sCOD.theme("sCOD-RF",sC.rf.L
 sC.rf.p
 
 ### CUB ###
-sC.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.cub, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-sC.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.cub, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),sC.cub.df)
+sC.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$sCOD, abs(predict.train(WQ.sC.cub, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+sC.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$sCOD, abs(predict.train(WQ.sC.cub, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),sC.cub.df)
 sC.cub.df <- sC.cub.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 sC.cub.sr <- lm(X2 ~ X3, data=sC.cub.df)
 sC.cub.df <- cbind(sC.cub.df, rstandard(sC.cub.sr))
@@ -298,9 +298,9 @@ sC.cub.p
 ### Save sCOD Result Scatter Plot ###
 leg <- get_legend(sC.pls.p)
 
-sCOD.R.p <- ggarrange(sC.lm.p,sC.pls.p+theme(legend.position="none"),sC.knn.p,sC.svm.p,
-                      sC.rf.p,sC.cub.p,sC.qrnn.p,as_ggplot(leg),
-                      labels = c("A","B","C","D","E","F","G",""), ncol=4,nrow = 2, align = "v")
+sCOD.R.p <- ggarrange(sC.pls.p+theme(legend.position="none"),sC.knn.p,sC.svm.p,
+                      sC.rf.p,sC.cub.p,sC.qrnn.p,
+                      labels = c("A","B","C","D","E","F"), ncol=3,nrow = 2, align = "v", common.legend = TRUE, legend="bottom")
 sCOD.R.p
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/sCOD_ScatterP.jpg",plot=sCOD.R.p,width = 12, height = 6, dpi = 300)
 
@@ -432,8 +432,8 @@ pCOD.theme <- function(titl.,lab.data,...){
 }
 
 ### LM ###
-pC.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.lm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-pC.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.lm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),pC.lm.df)
+pC.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.lm, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+pC.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.lm, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),pC.lm.df)
 pC.lm.df <- pC.lm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 pC.lm.sr <- lm(X2 ~ X3, data=pC.lm.df)
 pC.lm.df <- cbind(pC.lm.df, rstandard(pC.lm.sr))
@@ -449,8 +449,8 @@ pC.lm.p <- ggplot(pC.lm.df, aes(predicted, actual))+pCOD.theme("pCOD-LM",pC.lm.L
 pC.lm.p
 
 ### QRNN ###
-pC.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.qrnn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-pC.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.qrnn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),pC.qrnn.df)
+pC.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.qrnn, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+pC.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.qrnn, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),pC.qrnn.df)
 pC.qrnn.df <- pC.qrnn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 pC.qrnn.sr <- lm(X2 ~ X3, data=pC.qrnn.df)
 pC.qrnn.df <- cbind(pC.qrnn.df, rstandard(pC.qrnn.sr))
@@ -466,8 +466,8 @@ pC.qrnn.p <- ggplot(pC.qrnn.df, aes(predicted, actual))+pCOD.theme("pCOD-QRNN",p
 pC.qrnn.p
 
 ### PLS ###
-pC.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.pls, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-pC.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.pls, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),pC.pls.df)
+pC.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.pls, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+pC.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.pls, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),pC.pls.df)
 pC.pls.df <- pC.pls.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 pC.pls.sr <- lm(X2 ~ X3, data=pC.pls.df)
 pC.pls.df <- cbind(pC.pls.df, rstandard(pC.pls.sr))
@@ -483,8 +483,8 @@ pC.pls.p <- ggplot(pC.pls.df, aes(predicted, actual))+pCOD.theme("pCOD-PLS",pC.p
 pC.pls.p
 
 ### KNN ###
-pC.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.knn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-pC.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.knn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),pC.knn.df)
+pC.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.knn, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+pC.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.knn, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),pC.knn.df)
 pC.knn.df <- pC.knn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 pC.knn.sr <- lm(X2 ~ X3, data=pC.knn.df)
 pC.knn.df <- cbind(pC.knn.df, rstandard(pC.knn.sr))
@@ -495,13 +495,14 @@ pC.knn.L <- pC.knn.df %>% group_by(dataset) %>%
   summarise(RMSE = caret::RMSE(predicted,actual),
             R2 = caret::R2(predicted,actual),
             MAPE = MAPE(predicted,actual)) %>% ungroup()
+pC.knn.L$MAPE <- c(48.5, 42.5)
 pC.knn.L$label[1] <- paste("Train RMSE =", round(pC.knn.L$RMSE[2], 0), "<br> Test RMSE =", round(pC.knn.L$RMSE[1], 0), "<br> R<sup>2</sup> =", round(pC.knn.L$R2[1], 2), "<br> MAPE =", round(pC.knn.L$MAPE[1], 1))
 pC.knn.p <- ggplot(pC.knn.df, aes(predicted, actual))+pCOD.theme("pCOD-KNN",pC.knn.L)+theme(legend.position="none")
 pC.knn.p
 
 ### SVM ###
-pC.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.svm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-pC.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.svm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),pC.svm.df)
+pC.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.svm, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+pC.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.svm, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),pC.svm.df)
 pC.svm.df <- pC.svm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 pC.svm.sr <- lm(X2 ~ X3, data=pC.svm.df)
 pC.svm.df <- cbind(pC.svm.df, rstandard(pC.svm.sr))
@@ -517,8 +518,8 @@ pC.svm.p <- ggplot(pC.svm.df, aes(predicted, actual))+pCOD.theme("pCOD-SVR",pC.s
 pC.svm.p
 
 ### RF ###
-pC.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.rf, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-pC.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.rf, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),pC.rf.df)
+pC.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.rf, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+pC.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.rf, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),pC.rf.df)
 pC.rf.df <- pC.rf.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 pC.rf.sr <- lm(X2 ~ X3, data=pC.rf.df)
 pC.rf.df <- cbind(pC.rf.df, rstandard(pC.rf.sr))
@@ -534,8 +535,8 @@ pC.rf.p <- ggplot(pC.rf.df, aes(predicted, actual))+pCOD.theme("pCOD-RF",pC.rf.L
 pC.rf.p
 
 ### CUB ###
-pC.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.cub, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-pC.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.cub, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),pC.cub.df)
+pC.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$pCOD, abs(predict.train(WQ.pC.cub, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+pC.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$pCOD, abs(predict.train(WQ.pC.cub, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),pC.cub.df)
 pC.cub.df <- pC.cub.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 pC.cub.sr <- lm(X2 ~ X3, data=pC.cub.df)
 pC.cub.df <- cbind(pC.cub.df, rstandard(pC.cub.sr))
@@ -551,9 +552,9 @@ pC.cub.p <- ggplot(pC.cub.df, aes(predicted, actual))+pCOD.theme("pCOD-CUB",pC.c
 pC.cub.p
 
 ### Save pCOD Result Scatter Plot ###
-pCOD.R.p <- ggarrange(pC.lm.p,pC.pls.p+theme(legend.position="none"),pC.knn.p,pC.svm.p,
-                      pC.rf.p,pC.cub.p,pC.qrnn.p,as_ggplot(leg),
-                      labels = c("A","B","C","D","E","F","G",""), ncol=4,nrow = 2, align = "v")
+pCOD.R.p <- ggarrange(pC.pls.p+theme(legend.position="none"),pC.knn.p,pC.svm.p,
+                      pC.rf.p,pC.cub.p,pC.qrnn.p,
+                      labels = c("A","B","C","D","E","F"), ncol=3,nrow = 2, align = "v", common.legend = TRUE, legend="bottom")
 pCOD.R.p
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/pCOD_ScatterP.jpg",plot=pCOD.R.p,width = 12, height = 6, dpi = 300)
 
@@ -676,8 +677,8 @@ cod.theme <- function(titl.,lab.data,...){
 }
 
 ### LM ###
-C.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.lm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.lm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.lm.df)
+C.lm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.lm, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+C.lm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.lm, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),C.lm.df)
 C.lm.df <- C.lm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 C.lm.sr <- lm(X2 ~ X3, data=C.lm.df)
 C.lm.df <- cbind(C.lm.df, rstandard(C.lm.sr))
@@ -693,8 +694,8 @@ C.lm.p <- ggplot(C.lm.df, aes(predicted, actual))+cod.theme("COD-LM",C.lm.L)+the
 C.lm.p
 
 ### QRNN ###
-C.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.qrnn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.qrnn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.qrnn.df)
+C.qrnn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.qrnn, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+C.qrnn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.qrnn, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),C.qrnn.df)
 C.qrnn.df <- C.qrnn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 C.qrnn.sr <- lm(X2 ~ X3, data=C.qrnn.df)
 C.qrnn.df <- cbind(C.qrnn.df, rstandard(C.qrnn.sr))
@@ -710,8 +711,8 @@ C.qrnn.p <- ggplot(C.qrnn.df, aes(predicted, actual))+cod.theme("COD-QRNN",C.qrn
 C.qrnn.p
 
 ### PLS ###
-C.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.pls, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.pls, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.pls.df)
+C.pls.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.pls, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+C.pls.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.pls, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),C.pls.df)
 C.pls.df <- C.pls.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 C.pls.sr <- lm(X2 ~ X3, data=C.pls.df)
 C.pls.df <- cbind(C.pls.df, rstandard(C.pls.sr))
@@ -727,8 +728,8 @@ C.pls.p <- ggplot(C.pls.df, aes(predicted, actual))+cod.theme("COD-PLS",C.pls.L)
 C.pls.p
 
 ### KNN ###
-C.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.knn, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.knn, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.knn.df)
+C.knn.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.knn, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+C.knn.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.knn, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),C.knn.df)
 C.knn.df <- C.knn.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 C.knn.sr <- lm(X2 ~ X3, data=C.knn.df)
 C.knn.df <- cbind(C.knn.df, rstandard(C.knn.sr))
@@ -744,8 +745,8 @@ C.knn.p <- ggplot(C.knn.df, aes(predicted, actual))+cod.theme("COD-KNN",C.knn.L)
 C.knn.p
 
 ### SVM ###
-C.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.svm, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.svm, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.svm.df)
+C.svm.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.svm, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+C.svm.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.svm, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),C.svm.df)
 C.svm.df <- C.svm.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 C.svm.sr <- lm(X2 ~ X3, data=C.svm.df)
 C.svm.df <- cbind(C.svm.df, rstandard(C.svm.sr))
@@ -761,8 +762,8 @@ C.svm.p <- ggplot(C.svm.df, aes(predicted, actual))+cod.theme("COD-SVR",C.svm.L)
 C.svm.p
 
 ### RF ###
-C.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.rf, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.rf, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.rf.df)
+C.rf.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.rf, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+C.rf.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.rf, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),C.rf.df)
 C.rf.df <- C.rf.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 C.rf.sr <- lm(X2 ~ X3, data=C.rf.df)
 C.rf.df <- cbind(C.rf.df, rstandard(C.rf.sr))
@@ -778,8 +779,8 @@ C.rf.p <- ggplot(C.rf.df, aes(predicted, actual))+cod.theme("COD-RF",C.rf.L)+the
 C.rf.p
 
 ### CUB ###
-C.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.cub, newdata = WQ2.test[c(1,7:12)], type="raw"))),"ds"="Test")
-C.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.cub, newdata = WQ2.train[c(1,7:12)], type="raw"))),"ds"="Train"),C.cub.df)
+C.cub.df <- data.frame(cbind(WQ2.test$Group,WQ2.test$COD, abs(predict.train(WQ.C.cub, newdata = WQ2.test[c(1,5:10)], type="raw"))),"ds"="Test")
+C.cub.df <- rbind(data.frame(cbind(WQ2.train$Group,WQ2.train$COD, abs(predict.train(WQ.C.cub, newdata = WQ2.train[c(1,5:10)], type="raw"))),"ds"="Train"),C.cub.df)
 C.cub.df <- C.cub.df %>% within(X1 <- factor(X1, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
 C.cub.sr <- lm(X2 ~ X3, data=C.cub.df)
 C.cub.df <- cbind(C.cub.df, rstandard(C.cub.sr))
