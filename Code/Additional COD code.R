@@ -22,15 +22,11 @@ Raw$BP <-  ifelse (Raw$Group %in% c("S1","S2"), 0, 1)
 Raw <- Raw %>% arrange(Date,Group)
 Raw$Group <-  ifelse (Raw$Group == c("S1","S2","S3","S4","S5"), c("Influent","AnMBR","Permeate","Post-NCS","Effluent"), 0)
 Raw$Group <- factor(Raw$Group , levels=c("Influent","AnMBR","Permeate","Post-NCS","Effluent"))
-Raw <- subset(Raw, select = c("Group","Date","COD", "sCOD","TSS","E.coli","Color","Turb","EC","pH","NH4","NO3","Temp","Event","BP","VSS"))
+Raw <- subset(Raw, select = c("Group","Date","COD", "sCOD","Color","Turb","EC","pH","NH4","NO3","Temp","Event","BP","VSS"))
 
-Raw$VSS <- Raw$VSS*1000
-Raw$TSS <- Raw$TSS*1000
-Raw$TSS <- ifelse(Raw$TSS <= 0, 0.5, Raw$TSS)
 Raw$COD <- ifelse(Raw$COD <= 0, 0.5, Raw$COD)
-Raw$E.coli <- ifelse(Raw$E.coli <= 0, 1, Raw$E.coli)
 Raw$pCOD <- ifelse(Raw$COD - Raw$sCOD <= 0, 0, Raw$COD - Raw$sCOD)
-Raw <- Raw[c("Group","Date","COD", "sCOD","pCOD","TSS","E.coli","Color","Turb","EC","pH","NH4","NO3","Temp","Event","BP","VSS")]
+Raw <- Raw[c("Group","Date","COD", "sCOD","pCOD","Color","Turb","EC","pH","NH4","NO3","Temp","Event","BP","VSS")]
 WQ <- Raw
 
 
@@ -78,10 +74,10 @@ lower_fn <- function(data, mapping, ...) {
 }
 
 WQ2.cor <- WQ2 %>% within(Group <- factor(Group, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-colnames(WQ2.cor) <- c("Group", "COD", "sCOD","pCOD","TSS","E.coli","Color","Trubidity","EC","pH","NH4","NO3","Temperature") 
+colnames(WQ2.cor) <- c("Group", "COD", "sCOD","pCOD","Color","Trubidity","EC","pH","NH4","NO3","Temperature") 
 
 
-WQ2.Cor <- ggpairs(subset(WQ2.cor, select = -c(Group,E.coli)), 
+WQ2.Cor <- ggpairs(subset(WQ2.cor, select = -c(Group)), 
                    upper = list(continuous = upper_fn), lower = list(continuous = lower_fn), diag = list(continuous = diag_fn))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, size=5), axis.text.y = element_text(size=5),text = element_text(size=6))
 WQ2.Cor
