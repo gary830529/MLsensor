@@ -160,7 +160,7 @@ sC.knn.Imp <- ggplot(varImp(WQ.sC.knn, scale = T))+theme_bw()+labs(x=element_bla
 sC.svm.Imp <- ggplot(varImp(WQ.sC.svm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "sCOD-SVR")
 sC.cub.Imp <- ggplot(varImp(WQ.sC.cub, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "sCOD-CUB")
 sC.qrnn.Imp <- ggplot(varImp(WQ.sC.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "sCOD-QRNN")
-sC.varImp <- ggarrange(sC.lm.Imp,sC.pls.Imp, sC.svm.Imp,sC.rf.Imp, sC.cub.Imp,sC.qrnn.Imp, ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
+sC.varImp <- ggarrange(sC.pls.Imp, sC.knn.Imp, sC.svm.Imp,sC.rf.Imp, sC.cub.Imp,sC.qrnn.Imp, ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
 sC.varImp
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/SC_varImp.jpg",plot=sC.varImp,width = 6, height = 4, dpi = 300)
 
@@ -415,7 +415,7 @@ pC.knn.Imp <- ggplot(varImp(WQ.pC.knn, scale = T))+theme_bw()+labs(x=element_bla
 pC.svm.Imp <- ggplot(varImp(WQ.pC.svm, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "pCOD-SVR")
 pC.cub.Imp <- ggplot(varImp(WQ.pC.cub, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "pCOD-CUB")
 pC.qrnn.Imp <- ggplot(varImp(WQ.pC.qrnn, scale = T))+theme_bw()+labs(x=element_blank(), y="Importance (%)", title = "pCOD-QRNN")
-pC.varImp <- ggarrange(pC.lm.Imp,pC.pls.Imp, pC.svm.Imp, pC.rf.Imp, pC.cub.Imp,pC.qrnn.Imp, ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
+pC.varImp <- ggarrange(pC.pls.Imp, pC.knn.Imp, pC.svm.Imp, pC.rf.Imp, pC.cub.Imp,pC.qrnn.Imp, ncol=3, nrow = 2, align = "v", labels = "AUTO", common.legend = TRUE, legend="bottom")
 pC.varImp
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/PC_varImp.jpg",plot=pC.varImp,width = 6, height = 4, dpi = 300)
 
