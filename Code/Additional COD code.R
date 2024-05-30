@@ -51,37 +51,54 @@ WQ2.test <- WQ2[-WQ2.index,]
 
 
 #### Correlation for COD pCOD sCOD ####
-upper_fn <- function(data, mapping, method="pearson", use="pairwise", ...){
+upper_fn <- function(data, mapping, method = "spearman", use = "pairwise", ...){
   x <- eval_data_col(data, mapping$x)
   y <- eval_data_col(data, mapping$y)
-  corr <- cor(x, y, method=method, use=use)
-  colFn <- colorRampPalette(c("#4477AA", "#ffffff", "#BB4444"), interpolate ='spline')
-  fill <- colFn(100)[findInterval(corr, seq(-1, 1, length=100))]
-  ggally_cor(data = data, mapping = mapping, size = 2, color = '#050505', stars = T, ...) + 
+  corr <- cor(x, y, method = method, use = use)
+  colFn <- colorRampPalette(c("#4477AA", "#ffffff", "#BB4444"), interpolate = 'spline')
+  fill <- colFn(100)[findInterval(corr, seq(-1, 1, length = 100))]
+  
+  ggally_cor(data = data, mapping = mapping, size = 2, color = '#050505', stars = TRUE, method = method, ...) + 
     theme_void() +
-    theme(panel.background = element_rect(fill=fill))
+    theme(panel.background = element_rect(fill = fill))
 }
 
 diag_fn <- function(data, mapping, ...) {
   ggplot(data = data, mapping = mapping) +
-    geom_density(alpha=.2,...)+theme_bw()
+    geom_density(alpha = .2, ...) + theme_bw()
 }
 
 lower_fn <- function(data, mapping, ...) {
   ggplot(data = data, mapping = mapping) +
-    geom_point(color = '#050505', alpha=0.3, size=0.5) +
-    geom_smooth(color = '#ff8a8a', method='lm', size=0.5,se=F,...)+theme_bw()
+    geom_point(color = '#050505', alpha = 0.3, size = 0.5) +
+    geom_smooth(color = '#ff8a8a', method = 'lm', size = 0.5, se = FALSE, ...) + theme_bw()
 }
 
-WQ2.cor <- WQ2 %>% within(Group <- factor(Group, labels = c("Influent","AnMBR","Permeate","Post-NCS","Effluent")))
-colnames(WQ2.cor) <- c("Group", "COD", "sCOD","pCOD","Color","Trubidity","EC","pH","NH4","NO3","Temperature") 
+WQ2.cor <- WQ2 %>% within(Group <- factor(Group, labels = c("Influent", "AnMBR", "Permeate", "Post-NCS", "Effluent")))
+colnames(WQ2.cor) <- c("Group", "COD", "sCOD", "pCOD", "Color", "Trubidity", "EC", "pH", "NH4", "NO3", "Temperature")
 
+WQ2.Cor <- ggpairs(
+  subset(WQ2.cor, select = -c(Group)), 
+  upper = list(continuous = wrap(upper_fn, method = "spearman")), 
+  lower = list(continuous = lower_fn), 
+  diag = list(continuous = diag_fn)
+) +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 5), 
+    axis.text.y = element_text(size = 5), 
+    text = element_text(size = 6)
+  )
 
-WQ2.Cor <- ggpairs(subset(WQ2.cor, select = -c(Group)), 
-                   upper = list(continuous = upper_fn), lower = list(continuous = lower_fn), diag = list(continuous = diag_fn))+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, size=5), axis.text.y = element_text(size=5),text = element_text(size=6))
 WQ2.Cor
 #ggsave("G:/My Drive/R project/GitHub/MLsensor/Figure/CorrelationP.jpg",plot=WQ2.Cor,width = 5, height = 5, dpi = 300)
+
+WQ2.cor_new <- subset(WQ2.cor, select = -c(Group))
+       
+Cor_matrix <- cor(WQ2.cor_new, method = "spearman", use = "complete.obs")
+corrplot.mixed(Cor_matrix, lower = "number", upper = "square",
+               tl.pos = "lt", diag = "u", tl.col = "black",
+               tl.cex = 0.6, number.cex = 0.6,
+               tl.srt = 45)  
 
 #### Correlation between COD pCOD sCOD ####
 upper_fn2 <- function(data, mapping, method="pearson", use="pairwise", ...){
